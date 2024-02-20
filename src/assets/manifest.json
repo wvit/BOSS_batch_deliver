@@ -1,0 +1,39 @@
+{
+  "manifest_version": 3,
+  "name": "BOOS_batch_deliver",
+  "description": "BOOS直聘批量投递简历",
+  "version": "0.0.1",
+  "icons": {
+    "16": "img/icon.png",
+    "48": "img/icon.png",
+    "128": "img/icon.png"
+  },
+  "action": {},
+  "content_scripts": [
+    {
+      "matches": ["*://*.zhipin.com/*"],
+      "js": ["js/content.js"],
+      "run_at": "document_start",
+      "all_frames": true
+    }
+  ],
+  "permissions": [
+    "tabs",
+    "storage",
+    "webNavigation",
+    "activeTab",
+    "webRequest",
+    "contextMenus"
+  ],
+  "host_permissions": ["*://*.zhipin.com/*", "http://127.0.0.1:1999/"],
+  "web_accessible_resources": [
+    {
+      "resources": ["img/*.png"],
+      "matches": ["*://*/*"]
+    },
+    {
+      "resources": ["js/watchXHR.js"],
+      "matches": ["*://*/*"]
+    }
+  ]
+}
