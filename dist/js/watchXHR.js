@@ -1,1 +1,0 @@
-(()=>{"use strict";(()=>{const o=window._ahrealxhr,e=o.prototype.open;o.prototype.open=function(o,n){return"GET"===o&&0===n.indexOf("/wapi/zpgeek/pc/recommend/job/list.json")&&console.log(111111,o,n),e.apply(this,arguments)}})()})();

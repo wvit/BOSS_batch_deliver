@@ -1,3 +1,5 @@
+import qs from 'qs'
+
 /** 拦截XHR请求 */
 const interceptorXHR = () => {
   const XHR = (window as any)._ahrealxhr
@@ -8,7 +10,12 @@ const interceptorXHR = () => {
       method === 'GET' &&
       url.indexOf('/wapi/zpgeek/pc/recommend/job/list.json') === 0
     ) {
-      console.log(111111, method, url)
+      const [path, params] = url.split('?')
+
+      localStorage.setItem(
+        'fetchListData',
+        JSON.stringify({ method, url: path, params: qs.parse(params) })
+      )
     }
 
     return XHROpen.apply(this, arguments as any)

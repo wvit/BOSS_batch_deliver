@@ -8,11 +8,14 @@
     "48": "img/icon.png",
     "128": "img/icon.png"
   },
-  "action": {},
+  "action": {
+    "default_popup": "action/index.html",
+    "default_icon": "img/icon.png"
+  },
   "content_scripts": [
     {
       "matches": ["*://*.zhipin.com/*"],
-      "js": ["js/content.js"],
+      "js": ["content/index.js"],
       "run_at": "document_start",
       "all_frames": true
     }
@@ -32,7 +35,7 @@
       "matches": ["*://*/*"]
     },
     {
-      "resources": ["js/watchXHR.js"],
+      "resources": ["content/*.js"],
       "matches": ["*://*/*"]
     }
   ]
