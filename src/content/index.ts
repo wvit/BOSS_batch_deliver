@@ -8,11 +8,32 @@ window.addEventListener('DOMContentLoaded', () => {
 })
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  if (message.action === 'getFetchListData') {
-    const fetchListData = JSON.parse(
-      localStorage.getItem('fetchListData') || 'null'
-    )
+  const { action, url } = message
+  const actionHandle = {
+    /** 获取请求职位列表接口参数 */
+    getFetchJobListData: () => {
+      const fetchListData = JSON.parse(
+        localStorage.getItem('fetchJobListData') || 'null'
+      )
 
-    sendResponse({ fetchListData })
-  }
+      sendResponse({ fetchListData })
+    },
+
+    /** 打开聊天对话页面 */
+    openChatPage: () => {
+      const chatPage = window.open(url, '_blank')
+      if (!chatPage) return
+
+      chatPage.onload = () => {
+        setTimeout(() => {
+          const chatInput = chatPage.document.querySelector('#chat-input')
+          console.log(11111, chatInput)
+          if (!chatInput) return
+          chatInput.innerHTML = '你好，请问最近还招聘高级前端工程师吗'
+        }, 1000)
+      }
+    },
+  }[action]
+
+  actionHandle?.()
 })
