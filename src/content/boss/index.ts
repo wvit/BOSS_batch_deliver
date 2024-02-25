@@ -68,6 +68,7 @@ const openChatPage = async jobList => {
 /** 初始化boss直聘网站 content 脚本 */
 export const bossInit = () => {
   window.addEventListener('DOMContentLoaded', () => {
+    /** 因为直接在content脚本中无法部分window属性，所以需要单独插入一段脚本 */
     Dom.query('body').create('script', {
       type: 'text/javascript',
       src: getResource('/content/boss/watchXhr.js'),
