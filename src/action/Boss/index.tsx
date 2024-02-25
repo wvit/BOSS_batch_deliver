@@ -9,25 +9,42 @@ import {
   Checkbox,
   Popover,
   Button,
+  Popconfirm,
 } from 'antd'
-import { axios } from '@/utils'
+import { local, axios, getArr, sleep } from '@/utils'
 
+type PreferenceType = {
+  /** 每页数量 */
+  pageSize: number
+  /** 排除猎头职位 */
+  excludeHeadhunter: boolean
+  /** 排除已沟通过的职位 */
+  excludeComm: boolean
+}
+
+type FetchJobListOptionsType = {
+  /** 请求方法 */
+  methods: string
+  /** 请求地址 */
+  url: string
+  /** 请求参数 */
+  params: Record<string, any>
+}
+
+/** Boss直聘网站页面 */
 export const Boss = () => {
-  const [fetchJobListData, setFetchJobListData] = useState<any>(null)
+  const [fetchJobListOptions, setFetchJobListOptions] =
+    useState<FetchJobListOptionsType>()
   const [jobList, setJobList] = useState<any[]>([])
   const [jobDetailMap, setJobDetailMap] = useState({})
   const [fetchListLoading, setFetchListLoading] = useState(false)
   const [fetchDetailLoading, setFetchDetailLoading] = useState(false)
-  const [config, setConfig] = useState({
-    /** 每页数量 */
-    pageSize: 50,
-    /** 排除猎头职位 */
-    excludeHeadhunter: true,
-    /** 排除已沟通过的职位 */
-    excludeComm: true,
-  })
+  const [currentPageNo, setCurrentPageNo] = useState(0)
+  const [fetchListProgress, setFetchListProgress] = useState(0)
+  const [fetchDetailProgress, setFetchDetailProgress] = useState(0)
+  const [preference, setPreference] = useState<PreferenceType>()
 
-  const { pageSize, excludeHeadhunter, excludeComm } = config
+  const { pageSize = 15, excludeHeadhunter, excludeComm } = preference || {}
 
   /** 获取职位列表项禁用状态 */
   const getDisableStatus = item => {
@@ -47,35 +64,69 @@ export const Boss = () => {
   /** 选中的职位列表 */
   const checkedList = allowList.filter(item => item.checked)
 
+  /** 发起多次请求，直到返回数据列表达到指定数量 */
+  const fetchPageSize = async request => {
+    const pageNoList = getArr(pageSize / 15)
+    const maxPageNo = pageNoList.length
+    let list: any[] = []
+
+    for (const pageNo of pageNoList) {
+      const thisPageNo = pageNo + 1
+      const res = await request(currentPageNo + thisPageNo)
+
+      list = [...list, ...res]
+      setFetchListProgress(
+        Math.min(Math.ceil(100 / maxPageNo) * thisPageNo, 100)
+      )
+
+      /** 防止触发机器人验证 */
+      await sleep(200)
+    }
+
+    setCurrentPageNo(currentPageNo + maxPageNo)
+    return list
+  }
+
   /** 请求岗位列表 */
   const fetchJobList = async () => {
+    if (!fetchJobListOptions) return
     setFetchListLoading(true)
-    const { url, params } = fetchJobListData
-    const res = await axios.get(url, { params })
-    const list = res?.zpData?.jobList || []
-    const mergeList = [...jobList, ...list].map((item, index) => ({
+    const { url, params } = fetchJobListOptions
+    const pageList = await fetchPageSize(async pageNo => {
+      const res = await axios.get(url, {
+        params: { ...params, page: pageNo },
+      })
+      return res?.zpData?.jobList || []
+    })
+    const mergeList = [...jobList, ...pageList].map((item, index) => ({
       ...item,
       sort: index + 1,
     }))
 
     setFetchListLoading(false)
     setJobList(mergeList)
-    await fetchJobListDetail(list)
+    await fetchJobListDetail(pageList)
 
-    console.log(list, jobDetailMap)
+    console.log('职位数据', pageList, jobDetailMap)
   }
 
   /** 获取职位列表详情 */
   const fetchJobListDetail = async list => {
     setFetchDetailLoading(true)
 
-    for (const item of list) {
+    for (const [index, item] of list.entries()) {
       const { securityId, lid, encryptJobId } = item
       const res = await axios.get('/wapi/zpgeek/job/detail.json', {
         params: { securityId, lid },
       })
 
       jobDetailMap[encryptJobId] = res?.zpData
+      setFetchDetailProgress(
+        Math.min(Math.ceil(100 / list.length) * (index + 1), 100)
+      )
+
+      /** 防止触发机器人验证 */
+      await sleep(100)
     }
 
     setFetchDetailLoading(false)
@@ -88,6 +139,14 @@ export const Boss = () => {
       if (!tabs[0]?.id) return
       chrome.tabs.sendMessage(tabs[0].id, message, callback)
     })
+  }
+
+  /** 改变偏好配置数据 */
+  const changePreference = async (key: keyof PreferenceType, value) => {
+    const config = { ...preference, [key]: value } as PreferenceType
+
+    setPreference(config)
+    local.set({ preference: config })
   }
 
   /** 渲染已排除的列表项 */
@@ -224,11 +283,20 @@ export const Boss = () => {
           </Checkbox>
         </div>
 
-        <ul className=" h-[100%] overflow-x-auto pr-2">
-          <Spin spinning={fetchListLoading} className="pt-[100px]">
+        <Spin
+          wrapperClassName="h-0 flex-1"
+          spinning={fetchListLoading}
+          tip={`正在加载${fetchListProgress}%`}
+        >
+          <ul className=" h-[100%] overflow-x-auto pr-2">
             {jobList.map(renderJobItem)}
-          </Spin>
-        </ul>
+            <li className=" text-center">
+              <Button size="small" onClick={fetchJobList}>
+                加载下一页
+              </Button>
+            </li>
+          </ul>
+        </Spin>
       </Col>
     )
   }
@@ -247,8 +315,12 @@ export const Boss = () => {
               <Select
                 className="min-w-16"
                 size="small"
-                options={[{ label: '50条', value: 50 }]}
-                defaultValue={pageSize}
+                options={getArr(4).map(item => {
+                  const count = (item + 1) * 15
+                  return { label: `${count}条`, value: count }
+                })}
+                value={pageSize}
+                onChange={e => changePreference('pageSize', e)}
               />
               条数据
             </Space>
@@ -256,9 +328,9 @@ export const Boss = () => {
           <div>
             <Checkbox
               checked={excludeHeadhunter}
-              onChange={e => {
-                setConfig({ ...config, excludeHeadhunter: e.target.checked })
-              }}
+              onChange={e =>
+                changePreference('excludeHeadhunter', e.target.checked)
+              }
             >
               排除猎头顾问
             </Checkbox>
@@ -268,13 +340,16 @@ export const Boss = () => {
               })}
           </div>
 
-          <Spin spinning={fetchDetailLoading}>
+          <Spin
+            spinning={fetchDetailLoading}
+            tip={`正在加载${fetchDetailProgress}%`}
+          >
             <div>
               <Checkbox
                 checked={excludeComm}
-                onChange={e => {
-                  setConfig({ ...config, excludeComm: e.target.checked })
-                }}
+                onChange={e =>
+                  changePreference('excludeComm', e.target.checked)
+                }
               >
                 排除已沟通过的职位
               </Checkbox>
@@ -288,28 +363,31 @@ export const Boss = () => {
         </Space>
 
         <div className="footer-btns text-right">
-          <Button
-            type="primary"
-            onClick={() => {
+          <Popconfirm
+            title="是否确认执行?"
+            description="请注意每个平台的每天最大沟通聊天限制"
+            onConfirm={() => {
               sendMessage({ action: 'openChatPage', jobList: checkedList })
             }}
           >
-            沟通已选中职位
-          </Button>
+            <Button type="primary">沟通已选中职位</Button>
+          </Popconfirm>
         </div>
       </Col>
     )
   }
 
   useEffect(() => {
-    sendMessage({ action: 'getFetchJobListData' }, msg => {
-      setFetchJobListData(msg?.fetchListData)
+    local.get('preference').then(setPreference)
+
+    sendMessage({ action: 'getFetchJobListOptions' }, msg => {
+      setFetchJobListOptions(msg?.fetchListOptions)
     })
   }, [])
 
   useEffect(() => {
-    if (fetchJobListData) fetchJobList()
-  }, [fetchJobListData])
+    fetchJobList()
+  }, [fetchJobListOptions])
 
   return (
     <div className="h-[100%] flex flex-col">

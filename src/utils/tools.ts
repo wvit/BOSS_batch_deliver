@@ -2,7 +2,7 @@
 export const local = {
   /** 获取chrome数据缓存 */
   async get(key: string) {
-    const value = await new Promise(resolve => {
+    const value = await new Promise<any>(resolve => {
       chrome.storage.local.get(key, (store: any) => resolve(store[key]))
     })
 
@@ -27,3 +27,13 @@ export const getResource = (resource: string) => chrome.runtime.getURL(resource)
 export const getImg = (name: string, postfix = 'png') => {
   return require(`@/assets/img/${name}.${postfix}`)
 }
+
+/** 获取一个指定长度的数组 */
+export const getArr = length => {
+  return Array(length)
+    .fill(null)
+    .map((_, index) => index)
+}
+
+/** 睡眠定时器 */
+export const sleep = time => new Promise(resolve => setTimeout(resolve, time))

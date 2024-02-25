@@ -13,7 +13,7 @@ const interceptorXHR = () => {
       const [path, params] = url.split('?')
 
       localStorage.setItem(
-        'fetchJobListData',
+        'fetchJobListOptions',
         JSON.stringify({ method, url: path, params: qs.parse(params) })
       )
     }

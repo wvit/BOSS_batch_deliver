@@ -1,7 +1,4 @@
-import { Dom, getResource, axios } from '@/utils'
-
-/** 睡眠定时器 */
-const sleep = time => new Promise(resolve => setTimeout(resolve, time))
+import { Dom, getResource, axios, sleep } from '@/utils'
 
 /** 批量打开沟通聊天对话 */
 const openChatPage = async jobList => {
@@ -79,12 +76,12 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   const { action, jobList } = message
   const actionHandle = {
     /** 获取请求职位列表接口参数 */
-    getFetchJobListData: () => {
-      const fetchListData = JSON.parse(
-        localStorage.getItem('fetchJobListData') || 'null'
+    getFetchJobListOptions: () => {
+      const fetchListOptions = JSON.parse(
+        localStorage.getItem('fetchJobListOptions') || 'null'
       )
 
-      sendResponse({ fetchListData })
+      sendResponse({ fetchListOptions })
     },
 
     /** 批量打开沟通聊天对话 */
