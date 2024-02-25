@@ -1,7 +1,7 @@
 import qs from 'qs'
 
 /** 拦截XHR请求 */
-const interceptorXHR = () => {
+const interceptorXhr = () => {
   const XHR = (window as any)._ahrealxhr
   const XHROpen = XHR.prototype.open
 
@@ -22,4 +22,4 @@ const interceptorXHR = () => {
   }
 }
 
-interceptorXHR()
+interceptorXhr()

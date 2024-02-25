@@ -20,23 +20,20 @@ module.exports = {
     type: 'filesystem',
   },
   entry: {
-    content: './src/content/index.ts',
-    content_watchXHR: './src/content/watchXHR.ts',
     action: './src/action/index.tsx',
+    content: './src/content/index.ts',
+    content_boss_watchXhr: './src/content/boss/watchXhr.ts',
   },
   output: {
     path: path.resolve(__dirname, 'dist'),
     filename: chunkData => {
-      const { name } = chunkData.chunk
+      const pathChain = chunkData.chunk.name.split('_')
 
-      if (name === 'action') {
-        return `./[name]/index.js`
-      } else if (name.startsWith('content')) {
-        const filename = name.split('_')[1] || 'index'
-        return `./content/${filename}.js`
+      if (pathChain.length > 1) {
+        return `./${pathChain.join('/')}.js`
+      } else {
+        return `./${pathChain[0]}/index.js`
       }
-
-      return '[name].js'
     },
   },
   plugins: [
