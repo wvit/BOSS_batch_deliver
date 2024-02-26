@@ -23,11 +23,6 @@ export const local = {
 /** 获取chrome扩展资源 */
 export const getResource = (resource: string) => chrome.runtime.getURL(resource)
 
-/** 获取图片 */
-export const getImg = (name: string, postfix = 'png') => {
-  return require(`@/assets/img/${name}.${postfix}`)
-}
-
 /** 获取一个指定长度的数组 */
 export const getArr = length => {
   return Array(length)

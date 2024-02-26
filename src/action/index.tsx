@@ -15,4 +15,4 @@ const App = () => {
   )
 }
 
-createRoot(document.getElementById('app') as any).render(<App />)
+createRoot(document.querySelector('#app') as any).render(<App />)

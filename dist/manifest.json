@@ -4,23 +4,28 @@
   "description": "BOOS直聘批量投递简历",
   "version": "0.0.1",
   "icons": {
-    "16": "img/icon.png",
-    "48": "img/icon.png",
-    "128": "img/icon.png"
+    "16": "icon.png",
+    "48": "icon.png",
+    "128": "icon.png"
   },
   "action": {
     "default_popup": "action/index.html",
-    "default_icon": "img/icon.png"
+    "default_icon": "icon.png"
   },
   "content_scripts": [
     {
       "matches": ["*://*.zhipin.com/*"],
       "js": ["content/index.js"],
-      "run_at": "document_start",
+      "run_at": "document_end",
       "all_frames": true
     }
   ],
+  "background": {
+    "matches": ["*://*.zhipin.com/*"],
+    "service_worker": "background/index.js"
+  },
   "permissions": [
+    "scripting",
     "tabs",
     "storage",
     "webNavigation",
@@ -28,14 +33,10 @@
     "webRequest",
     "contextMenus"
   ],
-  "host_permissions": ["*://*.zhipin.com/*", "http://127.0.0.1:1999/"],
+  "host_permissions": ["*://*/*"],
   "web_accessible_resources": [
     {
-      "resources": ["img/*.png"],
-      "matches": ["*://*/*"]
-    },
-    {
-      "resources": ["content/*.js"],
+      "resources": ["*.png", "content/*.js"],
       "matches": ["*://*/*"]
     }
   ]

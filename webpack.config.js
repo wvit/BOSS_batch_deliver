@@ -9,8 +9,8 @@ const copyFiles = [
     to: `${path.resolve('dist')}/manifest.json`,
   },
   {
-    from: './src/assets/img/icon.png',
-    to: `${path.resolve('dist')}/img/icon.png`,
+    from: './src/assets/icon.png',
+    to: `${path.resolve('dist')}/icon.png`,
   },
 ]
 
@@ -22,6 +22,8 @@ module.exports = {
   entry: {
     action: './src/action/index.tsx',
     content: './src/content/index.ts',
+    background: './src/background/index.ts',
+
     content_boss_watchXhr: './src/content/boss/watchXhr.ts',
   },
   output: {
@@ -77,7 +79,7 @@ module.exports = {
         loader: 'url-loader',
         options: {
           limit: 102400,
-          name: 'img/[name].[hash:8].[ext]',
+          name: '[name].[hash:8].[ext]',
         },
       },
     ],

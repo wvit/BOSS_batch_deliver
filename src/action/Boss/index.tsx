@@ -367,7 +367,7 @@ export const Boss = () => {
             title="是否确认执行?"
             description="请注意每个平台的每天最大沟通聊天限制"
             onConfirm={() => {
-              sendMessage({ action: 'openChatPage', jobList: checkedList })
+              sendMessage({ action: 'batchOpenChatPage', jobList: checkedList })
             }}
           >
             <Button type="primary">沟通已选中职位</Button>
@@ -380,8 +380,8 @@ export const Boss = () => {
   useEffect(() => {
     local.get('preference').then(setPreference)
 
-    sendMessage({ action: 'getFetchJobListOptions' }, msg => {
-      setFetchJobListOptions(msg?.fetchListOptions)
+    sendMessage({ action: 'getFetchJobListOptions' }, res => {
+      setFetchJobListOptions(res?.fetchListOptions)
     })
   }, [])
 
