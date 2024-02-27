@@ -10,12 +10,15 @@ class CommProgress {
   jobList: any[] = []
 
   /** 打开批量沟通进度弹窗 */
-  open(jobList: any[]) {
+  open(options: { jobList: any[]; onClose: () => void }) {
+    const { jobList, onClose } = options
+
     this.jobList = jobList
 
     this.modal = Modal.info({
       width: 800,
       okText: '关闭弹窗',
+      onOk: onClose,
       title: (
         <>
           批量沟通职位进度
@@ -24,27 +27,33 @@ class CommProgress {
           </span>
         </>
       ),
-      content: this.renderContent(),
+      content: this.renderContent(-1),
     })
   }
 
   /** 更新当前正在处理的职位 */
-  updateCurrentJob = (currentIndex: number) => {
-    const jobItem = document.querySelector(`#job-item-${currentIndex + 1}`)
+  updateCurrentJob = (endIndex: number, status: string) => {
+    const jobItem = document.querySelector(`#job-item-${endIndex + 1}`)
 
+    /** 添加沟通状态 */
+    this.jobList[endIndex].commStatus = status
     this.modal.update({
-      content: this.renderContent(currentIndex),
+      content: this.renderContent(endIndex),
     })
     jobItem?.scrollIntoView({ behavior: 'smooth', block: 'center' })
   }
 
   /** 渲染弹窗内容 */
-  renderContent(currentIndex = 0) {
+  renderContent(endIndex: number) {
+    /** endIndex 为上一次处理结束的数据索引，currentIndex 为正在处理的数据索引 */
+    const currentIndex = endIndex + 1
+    /** 正在处理的职位数据 */
     const currentJob = this.jobList[currentIndex]
+    /** 正在处理的职位顺序值 */
     const currentSort = currentIndex + 1
     const listLength = this.jobList.length
-    const done = listLength === currentSort
-    const percent = Math.min(Math.ceil((100 / listLength) * currentSort), 100)
+    const done = currentSort > listLength
+    const percent = Math.min(Math.ceil((100 / listLength) * currentIndex), 100)
 
     return (
       <div>
@@ -76,6 +85,7 @@ class CommProgress {
               areaDistrict,
               businessDistrict,
               salaryDesc,
+              commStatus,
             } = item
             const sort = index + 1
 
@@ -87,7 +97,7 @@ class CommProgress {
                   opacity: currentSort > sort || done ? '0.5' : '',
                 }}
               >
-                <p className="flex">
+                <div className="flex">
                   <span>{sort}、</span>
                   <span
                     className="font-medium truncate max-w-[200px]"
@@ -104,13 +114,21 @@ class CommProgress {
                   </span>
                   {'>'}
                   <span className="text-[#fe574a]">{salaryDesc}</span>
-                </p>
-                <span
-                  className="truncate max-w-[150px]"
-                  title={`${areaDistrict}·${businessDistrict}`}
-                >
-                  {areaDistrict}·{businessDistrict}
-                </span>
+                </div>
+                <div className="flex">
+                  <span
+                    className="truncate max-w-[150px] mr-2"
+                    title={`${areaDistrict}·${businessDistrict}`}
+                  >
+                    {areaDistrict}·{businessDistrict}
+                  </span>
+                  {commStatus === 'error' && (
+                    <span className=" text-red-600">处理失败</span>
+                  )}
+                  {commStatus === 'success' && (
+                    <span className=" text-green-600">处理完成</span>
+                  )}
+                </div>
               </li>
             )
           })}

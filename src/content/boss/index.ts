@@ -4,38 +4,49 @@ import './index.css'
 
 /** 批量打开沟通聊天对话 */
 const batchOpenChatPage = async jobList => {
-  // const zp_token = (await axios.get('/wapi/zppassport/get/zpToken'))?.zpData
-  //   ?.token
-  // if (!zp_token) return
+  const zp_token = (await axios.get('/wapi/zppassport/get/zpToken'))?.zpData
+    ?.token
+  if (!zp_token) return
 
-  commProgress.open(jobList)
+  /** 是否已关闭弹窗 */
+  let closeModal = false
+
+  commProgress.open({
+    jobList,
+    onClose: () => {
+      closeModal = true
+      chrome.runtime.sendMessage({ action: 'closeWindow' })
+    },
+  })
 
   for (const [index, item] of jobList.entries()) {
     const { encryptJobId, securityId, lid } = item
 
-    /** 更新批量沟通进度 */
-    commProgress.updateCurrentJob(index)
+    /** 弹窗关闭后停止进程 */
+    if (closeModal) return
 
     /** 将对方添加进联系人才可以发消息 */
-    // await axios.post(
-    //   '/wapi/zpgeek/friend/add.json',
-    //   {},
-    //   {
-    //     /** 没有 zp_token 接口会报错 “请求不合法”  */
-    //     headers: { zp_token },
-    //     params: {
-    //       securityId,
-    //       lid,
-    //       jobId: encryptJobId,
-    //     },
-    //   }
-    // )
+    await axios.post(
+      '/wapi/zpgeek/friend/add.json',
+      {},
+      {
+        /** 没有 zp_token 接口会报错 “请求不合法”  */
+        headers: { zp_token },
+        params: {
+          securityId,
+          lid,
+          jobId: encryptJobId,
+        },
+      }
+    )
 
     await new Promise<void>(reslove => {
       chrome.runtime.sendMessage(
         { action: 'openChatPage', jobData: item },
         res => {
-          console.log(11111111, res)
+          /** 更新沟通状态 */
+          commProgress.updateCurrentJob(index, res?.[0]?.result)
+
           /** 进入下一个循环 */
           reslove()
         }

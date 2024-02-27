@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "BOOS_batch_deliver",
+  "name": "BOSS_batch_deliver",
   "description": "BOOS直聘批量投递简历",
   "version": "0.0.1",
   "icons": {
