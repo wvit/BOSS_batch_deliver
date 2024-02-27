@@ -1,0 +1,36 @@
+{
+  "code": 1,
+  "message": "开聊提醒",
+  "zpData": {
+    "bizCode": 1,
+    "bizMessage": "开聊提醒",
+    "bizData": {
+      "chatRemindDialog": {
+        "actionType": 1,
+        "ba": "%7B%22p2%22%3A%22d4b359f3878deedb1Hd92tu1FFdW%22%2C%22p3%22%3A%224b2905881ed22bcf1nV62Ny0FFVQ%22%2C%22p4%22%3A%220246c74d-c0e3-457d-a31e-4039d0e97b81.f1%3Acommon.eyJzZXNzaW9uSWQiOiJiNjExZGI0Ny1iYjMzLTQ0ZjctOGM1Yi03YjU1ZTM2YzkwNjkiLCJyY2RCelR5cGUiOiJmMV9ncmNkIn0.3%22%2C%22p5%22%3A0%2C%22p6%22%3A1%2C%22p7%22%3A0%2C%22p%22%3A%22befb16e0e7b88d0c1nV93ty4FFFU%22%2C%22action%22%3A%22%22%7D",
+        "title": "无法进行沟通",
+        "content": "今日沟通人数已达上限，请明天再试",
+        "buttonList": [
+          {
+            "text": "确定",
+            "actionType": 9,
+            "data": null,
+            "url": "",
+            "webUrl": "",
+            "ba": null,
+            "iconUrl": null
+          }
+        ],
+        "iconUrl": null,
+        "picUrl": null,
+        "showNotRemind": false,
+        "remindType": 0,
+        "showType": 0,
+        "blockLevel": 0,
+        "blockInfos": [],
+        "hitType": 0,
+        "style": 0
+      }
+    }
+  }
+}

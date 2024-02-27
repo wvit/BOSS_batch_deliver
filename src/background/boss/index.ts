@@ -12,10 +12,6 @@ const openChatPage = async (jobData, sendResponse) => {
         {
           url: 'about:blank',
           type: 'normal',
-          width: 1200,
-          height: 800,
-          left: 200,
-          top: 200,
           state: 'minimized',
         },
         window => reslove(window.id)
@@ -41,7 +37,7 @@ const openChatPage = async (jobData, sendResponse) => {
         const getDom = selector => document.querySelector(selector)
         const sleep = time => new Promise(resolve => setTimeout(resolve, time))
 
-        await sleep(200)
+        await sleep(500)
 
         const [chatInput, emoji, sendBtn] = [
           getDom('#chat-input'),
@@ -63,7 +59,7 @@ const openChatPage = async (jobData, sendResponse) => {
         /** 点击触发按钮 */
         sendBtn.click()
 
-        await sleep(500)
+        await sleep(1000)
 
         return 'success'
       },

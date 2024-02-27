@@ -1,4 +1,5 @@
-import { Dom, getResource, axios, sleep } from '@/utils'
+import { message } from 'antd'
+import { Dom, getResource, axios } from '@/utils'
 import { commProgress } from './CommProgress'
 import './index.css'
 
@@ -6,7 +7,7 @@ import './index.css'
 const batchOpenChatPage = async jobList => {
   const zp_token = (await axios.get('/wapi/zppassport/get/zpToken'))?.zpData
     ?.token
-  if (!zp_token) return
+  if (!zp_token || !jobList?.length) return
 
   /** 是否已关闭弹窗 */
   let closeModal = false
@@ -26,7 +27,7 @@ const batchOpenChatPage = async jobList => {
     if (closeModal) return
 
     /** 将对方添加进联系人才可以发消息 */
-    await axios.post(
+    const addRes = await axios.post(
       '/wapi/zpgeek/friend/add.json',
       {},
       {
@@ -40,12 +41,17 @@ const batchOpenChatPage = async jobList => {
       }
     )
 
+    /** 提示添加沟通联系人失败消息 */
+    if (addRes?.code === 1 && addRes?.zpData?.bizCode === 1) {
+      return message.warning(addRes.zpData.bizData?.chatRemindDialog?.content)
+    }
+
     await new Promise<void>(reslove => {
       chrome.runtime.sendMessage(
         { action: 'openChatPage', jobData: item },
-        res => {
+        msg => {
           /** 更新沟通状态 */
-          commProgress.updateCurrentJob(index, res?.[0]?.result)
+          commProgress.updateCurrentJob(index, msg?.[0]?.result)
 
           /** 进入下一个循环 */
           reslove()
