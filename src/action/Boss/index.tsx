@@ -3,7 +3,8 @@ import { Alert, Row, Col, Button, Popconfirm } from 'antd'
 import { local, axios, getArr, sleep } from '@/utils'
 import { PreferenceConfig, defaultPreference } from './PreferenceConfig'
 import { JobList } from './JobList'
-import type { PreferenceType } from './PreferenceConfig'
+import type { PreferenceType, PreferenceConfigProps } from './PreferenceConfig'
+import { resourceUsage } from 'process'
 
 type FetchJobListOptionsType = {
   /** 请求方法 */
@@ -32,21 +33,38 @@ export const Boss = () => {
   const [preference, setPreference] =
     useState<PreferenceType>(defaultPreference)
 
-  const { pageSize, excludeHeadhunter, excludeComm } = {
-    ...defaultPreference,
-    ...preference,
+  /** 获取偏好设置指定属性 */
+  const getPreference: PreferenceConfigProps['getPreference'] = key => {
+    return { ...defaultPreference, ...preference }[key]
   }
 
-  /** 获取职位列表项禁用状态 */
-  const getDisableStatus = item => {
-    const { bossTitle, encryptJobId } = item
+  /** 获取当前职位禁用状态 */
+  const getDisableStatus: PreferenceConfigProps['getDisableStatus'] = (
+    jobData,
+    preferenceKey
+  ) => {
+    const { bossTitle, encryptJobId, brandName } = jobData
     const jobDetail = jobDetailMap[encryptJobId]
-    const { beFriend } = jobDetail?.relationInfo || {}
+    const { relationInfo, jobInfo } = jobDetail || {}
+    const disableStatus = {
+      excludeComm: relationInfo?.beFriend,
+      excludeHeadhunter: bossTitle.includes('猎头顾问'),
+      excludeCompany: getPreference('companyNames').includes(brandName),
+      excludeKeyword: !!getPreference('keywords').find(item => {
+        const jd = jobInfo?.postDescription.replace(/\s/g, '')
+        const pattern = new RegExp(item.replace(/\s/g, ''), 'i')
+        return pattern.test(jd)
+      }),
+    }
+    const disableList = Object.keys(disableStatus).map(key => {
+      return getPreference(key as keyof PreferenceType) && disableStatus[key]
+    })
 
-    return (
-      (excludeHeadhunter && bossTitle.includes('猎头顾问')) ||
-      (excludeComm && beFriend)
-    )
+    /** 根据指定的偏好设置，获取当前的职位的禁用状态 */
+    if (preferenceKey) return disableStatus[preferenceKey]
+
+    /** 根据所有的偏好设置，判断当前是否是否应该禁用 */
+    return disableList.includes(true)
   }
 
   /** 允许正常操作的职位列表 */
@@ -56,8 +74,8 @@ export const Boss = () => {
   const checkedList = allowList.filter(item => item.checked)
 
   /** 发起多次请求，直到返回数据列表达到指定数量 */
-  const fetchPageSize = async request => {
-    const pageNoList = getArr(pageSize / 15)
+  const fetchPageSize = async (request: (params: any) => Promise<any>) => {
+    const pageNoList = getArr(getPreference('pageSize') / 15)
     const maxPageNo = pageNoList.length
     let list: any[] = []
 
@@ -102,7 +120,7 @@ export const Boss = () => {
   }
 
   /** 获取职位列表详情 */
-  const fetchJobListDetail = async list => {
+  const fetchJobListDetail = async (list: any[]) => {
     setFetchDetailStatus(prevState => ({ ...prevState, loading: true }))
 
     for (const [index, item] of list.entries()) {
@@ -134,9 +152,8 @@ export const Boss = () => {
   }
 
   /** 改变偏好配置数据 */
-  const changePreference = async (key: keyof PreferenceType, value) => {
-    const config = { ...preference, [key]: value } as PreferenceType
-
+  const changePreference: PreferenceConfigProps['onChange'] = (key, value) => {
+    const config = { ...preference, [key]: value }
     setPreference(config)
     local.set({ preference: config })
   }
@@ -161,7 +178,7 @@ export const Boss = () => {
         closable
       />
       <Row className="my-2 h-0 flex-1">
-        <Col span={14} className="h-[100%] flex flex-col ">
+        <Col span={13} className="h-[100%] flex flex-col ">
           <JobList
             jobList={jobList}
             jobDetailMap={jobDetailMap}
@@ -174,14 +191,14 @@ export const Boss = () => {
           />
         </Col>
         <Col
-          span={10}
+          span={11}
           className="pl-2 border border-t-0 border-r-0 border-b-0 border-dashed border-[#999] flex flex-col"
         >
           <PreferenceConfig
             jobList={jobList}
-            jobDetailMap={jobDetailMap}
-            preference={preference}
             fetchDetailStatus={fetchDetailStatus}
+            getDisableStatus={getDisableStatus}
+            getPreference={getPreference}
             onChange={changePreference}
           />
           <div className="footer-btns text-right">
@@ -191,6 +208,7 @@ export const Boss = () => {
               onConfirm={() => {
                 sendMessage({
                   action: 'batchOpenChatPage',
+                  chatMessage: getPreference('chatMessage'),
                   jobList: checkedList,
                 })
                 window.close()

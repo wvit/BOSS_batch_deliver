@@ -4,27 +4,30 @@ import { commProgress } from './CommProgress'
 import './index.css'
 
 /** 批量打开沟通聊天对话 */
-const batchOpenChatPage = async jobList => {
+const batchOpenChatPage = async (jobList: any[], chatMessage: string) => {
   const zp_token = (await axios.get('/wapi/zppassport/get/zpToken'))?.zpData
     ?.token
   if (!zp_token || !jobList?.length) return
 
-  /** 是否已关闭弹窗 */
-  let closeModal = false
+  /** 是否停止发送消息 */
+  let stopSendMsg = false
 
   commProgress.open({
     jobList,
     onClose: () => {
-      closeModal = true
+      stopSendMsg = true
       chrome.runtime.sendMessage({ action: 'closeWindow' })
+    },
+    onStop: () => {
+      stopSendMsg = true
     },
   })
 
   for (const [index, item] of jobList.entries()) {
     const { encryptJobId, securityId, lid } = item
 
-    /** 弹窗关闭后停止进程 */
-    if (closeModal) return
+    /** 是否停止发送沟通消息 */
+    if (stopSendMsg) return
 
     /** 将对方添加进联系人才可以发消息 */
     const addRes = await axios.post(
@@ -48,7 +51,7 @@ const batchOpenChatPage = async jobList => {
 
     await new Promise<void>(reslove => {
       chrome.runtime.sendMessage(
-        { action: 'openChatPage', jobData: item },
+        { action: 'openChatPage', jobData: item, chatMessage },
         msg => {
           /** 更新沟通状态 */
           commProgress.updateCurrentJob(index, msg?.[0]?.result)
@@ -71,7 +74,7 @@ export const bossInit = () => {
 
   chrome.runtime.onMessage.addListener(
     async (message, sender, sendResponse) => {
-      const { action, jobList } = message
+      const { action, jobList, chatMessage } = message
 
       if (action === 'getFetchJobListOptions') {
         const fetchListOptions = JSON.parse(
@@ -80,7 +83,7 @@ export const bossInit = () => {
 
         sendResponse({ fetchListOptions })
       } else if (action === 'batchOpenChatPage') {
-        batchOpenChatPage(jobList)
+        batchOpenChatPage(jobList, chatMessage)
       }
     }
   )

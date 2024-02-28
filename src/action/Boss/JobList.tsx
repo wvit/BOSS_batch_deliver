@@ -1,5 +1,6 @@
 import React, { memo } from 'react'
-import { Checkbox, Spin, Button } from 'antd'
+import { Checkbox, Spin, Button, Popover, Space } from 'antd'
+import type { PreferenceConfigProps } from './PreferenceConfig'
 
 export interface JobListProps {
   /** 职位列表数据 */
@@ -12,8 +13,8 @@ export interface JobListProps {
   jobDetailMap: Record<string, any>
   /** 请求职位详情时的状态数据 */
   fetchListStatus: { loading?: boolean; progress?: number }
-  /** 获取当前职位是否为禁用状态 */
-  getDisableStatus: (jobData: any) => boolean
+  /** 获取当前职位禁用状态 */
+  getDisableStatus: PreferenceConfigProps['getDisableStatus']
   /** 请求职位列表 */
   fetchJobList: () => void
   /** 职位列表数据改变事件 */
@@ -26,6 +27,7 @@ export const JobList = memo((props: JobListProps) => {
     jobList,
     checkedList,
     allowList,
+    jobDetailMap,
     fetchListStatus,
     getDisableStatus,
     fetchJobList,
@@ -40,11 +42,14 @@ export const JobList = memo((props: JobListProps) => {
       skills,
       areaDistrict,
       businessDistrict,
+      encryptJobId,
       salaryDesc,
       checked,
       sort,
     } = item
     const disabled = getDisableStatus(item)
+    const jobDetail = jobDetailMap[encryptJobId] || {}
+    const { address, postDescription } = jobDetail.jobInfo || {}
 
     return (
       <li
@@ -94,7 +99,7 @@ export const JobList = memo((props: JobListProps) => {
               {areaDistrict}·{businessDistrict}
             </span>
           </div>
-          <div className="flex justify-between items-center mt-3">
+          <div className="flex justify-between items-center mt-2">
             <p className=" leading-[22px] overflow-x-auto whitespace-nowrap">
               {skills.map(item => {
                 return (
@@ -104,7 +109,29 @@ export const JobList = memo((props: JobListProps) => {
                 )
               })}
             </p>
-            <a className=" shrink-0 pl-2">详情</a>
+
+            <Popover
+              content={
+                <Space
+                  direction="vertical"
+                  size="large"
+                  className=" max-w-[500px] max-h-[300px] overflow-auto m-1"
+                >
+                  <div>
+                    <strong>详细地址：</strong>
+                    <p className=" text-xs text-[#333]">{address}</p>
+                  </div>
+                  <div>
+                    <strong>职位描述：</strong>
+                    <p className=" text-xs text-[#333]">
+                      <pre>{postDescription}</pre>
+                    </p>
+                  </div>
+                </Space>
+              }
+            >
+              <a className=" shrink-0 pl-2">详情</a>
+            </Popover>
           </div>
         </div>
       </li>

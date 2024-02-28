@@ -2,7 +2,11 @@
 let windowId = null
 
 /** 打开聊天对话标签页 */
-const openChatPage = async (jobData, sendResponse) => {
+const openChatPage = async (
+  jobData: any,
+  chatMessage: string,
+  sendResponse: (msg: string) => void
+) => {
   const { encryptBossId, encryptJobId, securityId, lid } = jobData
 
   if (!windowId) {
@@ -33,7 +37,7 @@ const openChatPage = async (jobData, sendResponse) => {
   chrome.scripting.executeScript(
     {
       target: { tabId },
-      func: async () => {
+      func: async chatMessage => {
         const getDom = selector => document.querySelector(selector)
         const sleep = time => new Promise(resolve => setTimeout(resolve, time))
 
@@ -50,19 +54,21 @@ const openChatPage = async (jobData, sendResponse) => {
         /** 先添加一个符号表情，触发输入框事件 */
         emoji.click()
 
+        await sleep(500)
+
         /** 添加输入框内容 */
-        chatInput.innerText =
-          '你好，我叫吴维，请问贵公司还需要高级前端开发工程师吗，6年前端工作经验。这是我的个人主页，里面有非常详细的自我介绍: https://wuwei.chat'
+        chatInput.innerText = chatMessage
 
         await sleep(500)
 
         /** 点击触发按钮 */
         sendBtn.click()
 
-        await sleep(1000)
+        await sleep(500)
 
         return 'success'
       },
+      args: [chatMessage],
     },
     sendResponse
   )
@@ -71,10 +77,10 @@ const openChatPage = async (jobData, sendResponse) => {
 /** 初始化boss直聘网站 background 脚本 */
 export const bossInit = () => {
   chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-    const { action, jobData } = message
+    const { action, jobData, chatMessage } = message
 
     if (action === 'openChatPage') {
-      openChatPage(jobData, sendResponse)
+      openChatPage(jobData, chatMessage, sendResponse)
     } else if (action === 'closeWindow' && windowId) {
       chrome.windows.remove(windowId, () => {
         windowId = null

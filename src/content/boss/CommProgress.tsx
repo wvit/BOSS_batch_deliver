@@ -1,5 +1,5 @@
 import React from 'react'
-import { Modal, Progress } from 'antd'
+import { Modal, Progress, Button } from 'antd'
 
 /** 批量沟通进度 */
 class CommProgress {
@@ -10,15 +10,13 @@ class CommProgress {
   jobList: any[] = []
 
   /** 打开批量沟通进度弹窗 */
-  open(options: { jobList: any[]; onClose: () => void }) {
-    const { jobList, onClose } = options
+  open(options: { jobList: any[]; onClose: () => void; onStop: () => void }) {
+    const { jobList, onClose, onStop } = options
 
     this.jobList = jobList
 
     this.modal = Modal.info({
       width: 800,
-      okText: '关闭弹窗',
-      onOk: onClose,
       title: (
         <>
           批量沟通职位进度
@@ -26,6 +24,22 @@ class CommProgress {
             （关闭弹窗将停止批量沟通）
           </span>
         </>
+      ),
+      footer: (
+        <div className=" text-right">
+          <Button className=" mr-4" onClick={onStop}>
+            停止发送消息
+          </Button>
+          <Button
+            type="primary"
+            onClick={() => {
+              onClose?.()
+              this.modal.destroy()
+            }}
+          >
+            关闭弹窗
+          </Button>
+        </div>
       ),
       content: this.renderContent(-1),
     })
