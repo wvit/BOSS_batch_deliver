@@ -1,6 +1,6 @@
 ### BOSS_Batch_Deliver
 
-BOSS直聘 批量沟通职位 chrome 插件，将根目录下 “dist.zip” 下载并解压后，在 chrome://extensions/ 插件管理页面加载即可使用。
+BOSS 直聘 批量沟通职位 chrome 插件，将根目录下 “dist.zip” 下载并解压后，在 chrome://extensions/ 插件管理页面加载即可使用。
 
 ### 帮助说明
 
@@ -17,6 +17,6 @@ BOSS直聘 批量沟通职位 chrome 插件，将根目录下 “dist.zip” 下
 
 ### 插件预览
 
-![插件内容](/src/aseets/imgs/demo1.jpg)
+![插件内容](./src/assets/imgs/demo1.jpg)
 
-![批量沟通进度](/src/aseets/imgs/demo2.jpg)
+![批量沟通进度](./src/assets/imgs/demo2.jpg)
