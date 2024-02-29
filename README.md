@@ -14,3 +14,9 @@ BOSS 直聘，批量沟通职位 chrome 插件，将根目录下 “dist.zip” 
 
 5. 本插件不会记录和获取你在招聘平台的任何用户信息，请放心使用。
    这是插件的代码仓库地址：[Github](https://github.com/wvit/BOSS_batch_deliver.git) 或 [Gitee](https://github.com/wvit/BOSS_batch_deliver.git)
+
+### 插件预览
+
+![插件内容](./src/aseets/imgs/demo1.jpg)
+
+![批量沟通进度](./src/aseets/imgs/demo1.jpg)
