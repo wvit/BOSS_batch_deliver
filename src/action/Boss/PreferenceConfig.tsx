@@ -1,4 +1,4 @@
-import React, { memo } from 'react'
+import React, { memo, ReactNode } from 'react'
 import { Space, Select, Checkbox, Spin, Popover, Input } from 'antd'
 import { getArr } from '@/utils'
 
@@ -33,6 +33,8 @@ export interface PreferenceConfigProps {
   ) => boolean
   /** 获取偏好设置指定属性 */
   getPreference: <T extends keyof PreferenceType>(key: T) => PreferenceType[T]
+  /** 渲染序号列表 */
+  renderSortList: (list: any) => ReactNode
   /** 修改偏好设置数据方法 */
   onChange: <T extends keyof PreferenceType>(
     key: T,
@@ -59,6 +61,7 @@ export const PreferenceConfig = memo((props: PreferenceConfigProps) => {
     fetchDetailStatus,
     getPreference,
     getDisableStatus,
+    renderSortList,
     onChange,
   } = props
 
@@ -71,31 +74,15 @@ export const PreferenceConfig = memo((props: PreferenceConfigProps) => {
   /** 渲染已排除的列表项 */
   const renderExcludeList = (preferenceKey: keyof PreferenceType) => {
     if (!getPreference(preferenceKey)) return
-
-    const filterList = jobList
-      .filter(item => getDisableStatus(item, preferenceKey))
-      .map((item, index) => {
-        const { sort } = item
-        return (
-          <>
-            {!!index && '、'}
-            <a
-              onClick={() => {
-                const cardItem = document.querySelector(`#card-item-${sort}`)
-                cardItem?.scrollIntoView({ behavior: 'smooth' })
-              }}
-            >
-              {sort}
-            </a>
-          </>
-        )
-      })
+    const filterList = jobList.filter(item =>
+      getDisableStatus(item, preferenceKey)
+    )
 
     return (
       <Popover
         content={
           <div className="max-w-[300px] max-h-[200px] overflow-y-auto">
-            已排除第 {filterList} 项
+            已排除第 {renderSortList(filterList)} 项
           </div>
         }
       >
@@ -106,15 +93,6 @@ export const PreferenceConfig = memo((props: PreferenceConfigProps) => {
 
   return (
     <Space direction="vertical" size="large" className="h-0 flex-1">
-      <div className="flex items-center">
-        <span className="flex-shrink-0 mr-2">沟通文案</span>
-        <Input.TextArea
-          value={getPreference('chatMessage')}
-          onChange={e => onChange('chatMessage', e.target.value)}
-          placeholder="请输入与招聘人打招呼的文案"
-          autoSize={{ minRows: 3, maxRows: 6 }}
-        />
-      </div>
       <div>
         <Space>
           每页加载
@@ -131,6 +109,33 @@ export const PreferenceConfig = memo((props: PreferenceConfigProps) => {
           条数据
         </Space>
       </div>
+      <div>
+        <p className="flex flex-shrink-0 mr-2">
+          自动向招聘人发送的消息
+          <Popover
+            content={
+              <div className="w-[300px]">
+                将优先使用您在平台配置的打招呼语，如果您未设置，也可以在下列输入框添加自定义消息。
+                <p className=" mt-3">
+                  打招呼语配置路径：{`[设置] > [打招呼语]`}{' '}
+                </p>
+              </div>
+            }
+          >
+            <span className=" cursor-pointer ml-2 text-center w-[14px] h-[14px] text-[12px] text-[#999] rounded-[50%] border border-solid border-[#999]">
+              ?
+            </span>
+          </Popover>
+        </p>
+        <Input.TextArea
+          className=" mt-1"
+          value={getPreference('chatMessage')}
+          onChange={e => onChange('chatMessage', e.target.value)}
+          placeholder="请输入与招聘人打招呼的文案"
+          autoSize={{ minRows: 3, maxRows: 6 }}
+        />
+      </div>
+
       <div>
         <Checkbox
           checked={getPreference('excludeHeadhunter')}

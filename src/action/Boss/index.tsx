@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from 'react'
-import { Alert, Row, Col, Button, Popconfirm } from 'antd'
+import { Alert, Row, Col, Button, Popconfirm, Popover, Space } from 'antd'
 import { local, axios, getArr, sleep } from '@/utils'
 import { PreferenceConfig, defaultPreference } from './PreferenceConfig'
 import { JobList } from './JobList'
 import type { PreferenceType, PreferenceConfigProps } from './PreferenceConfig'
-import { resourceUsage } from 'process'
 
 type FetchJobListOptionsType = {
   /** 请求方法 */
@@ -156,6 +155,101 @@ export const Boss = () => {
     local.set({ preference: config })
   }
 
+  /** 渲染序号列表 */
+  const renderSortList = list => {
+    return list.map((item, index) => {
+      const { sort } = item
+      return (
+        <>
+          {index ? '、' : ' '}
+          <a
+            onClick={() => {
+              const cardItem = document.querySelector(`#card-item-${sort}`)
+              cardItem?.scrollIntoView({ behavior: 'smooth' })
+            }}
+          >
+            {sort}
+          </a>
+        </>
+      )
+    })
+  }
+
+  /** 渲染链接节点 */
+  const renderLink = url => {
+    return (
+      <a
+        onClick={() => {
+          sendMessage({
+            action: 'gotoPage',
+            gotoUrl: url,
+            gotoTarget: '_blank',
+          })
+        }}
+      >
+        {url}
+      </a>
+    )
+  }
+
+  /**  渲染头部公告提示信息 */
+  const renderHeadNotice = () => {
+    const gotoUrl = 'https://www.zhipin.com/web/geek/job-recommend'
+
+    return (
+      <Alert
+        message={
+          <>
+            将根据Boss直聘网站，
+            <Popover content={`点击跳转至：${gotoUrl}`}>
+              <a onClick={() => sendMessage({ action: 'gotoPage', gotoUrl })}>
+                推荐职位页面
+              </a>
+            </Popover>
+            中，展示的职位列表和筛选条件进行查询。
+            <Popover
+              trigger={['click']}
+              content={
+                <div className="w-[500px]">
+                  <Space direction="vertical" size="large">
+                    <p>
+                      1、当您跳转到推荐职位页面后，页面会展示【推荐职位】或您自己添加【求职期望】，这时候打开插件，职位列表就是当前网站中展示职位列表。
+                    </p>
+                    <p>
+                      2、在添加自定义打招呼消息文案后，然后开始批量沟通已选中职位，这时候会自动打开一个最小化浏览器窗口帮您自动发送沟通消息。
+                    </p>
+                    <p>
+                      3、如果你在平台配置过【打招呼语】，那么将不会使用在插件中配置的自定义消息。
+                      并且批量沟通的进度也比发送自定义消息要快，因为会少几个处理步骤。
+                    </p>
+                    <p>
+                      4、如果在使用过程中出现问题，您可以尝试网页或重新加载插件。
+                    </p>
+                    <p>
+                      5、本插件不会记录和获取你在招聘平台的任何用户信息，请放心使用。
+                      这是插件的代码仓库地址：
+                      {renderLink(
+                        'https://github.com/wvit/BOSS_batch_deliver.git'
+                      )}
+                      <span className=" mx-2">或</span>
+                      {renderLink(
+                        'https://github.com/wvit/BOSS_batch_deliver.git'
+                      )}
+                    </p>
+                  </Space>
+                </div>
+              }
+            >
+              <a className=" ml-4">【更多说明】</a>
+            </Popover>
+          </>
+        }
+        type="info"
+        closable
+      />
+    )
+  }
+
   useEffect(() => {
     local.get('preference').then(setPreference)
 
@@ -170,11 +264,7 @@ export const Boss = () => {
 
   return (
     <div className="h-[100%] flex flex-col">
-      <Alert
-        message="将根据当前网站页面展示的职位列表和筛选条件进行查询"
-        type="info"
-        closable
-      />
+      {renderHeadNotice()}
       <Row className="my-2 h-0 flex-1">
         <Col span={13} className="h-[100%] flex flex-col ">
           <JobList
@@ -185,6 +275,7 @@ export const Boss = () => {
             fetchListStatus={fetchListStatus}
             getDisableStatus={getDisableStatus}
             fetchJobList={fetchJobList}
+            renderSortList={renderSortList}
             onChange={setJobList}
           />
         </Col>
@@ -197,6 +288,7 @@ export const Boss = () => {
             fetchDetailStatus={fetchDetailStatus}
             getDisableStatus={getDisableStatus}
             getPreference={getPreference}
+            renderSortList={renderSortList}
             onChange={changePreference}
           />
           <div className="footer-btns text-right">

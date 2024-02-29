@@ -1,4 +1,4 @@
-import React, { memo } from 'react'
+import React, { memo, ReactNode } from 'react'
 import { Checkbox, Spin, Button, Popover, Space } from 'antd'
 import type { PreferenceConfigProps } from './PreferenceConfig'
 
@@ -17,6 +17,8 @@ export interface JobListProps {
   getDisableStatus: PreferenceConfigProps['getDisableStatus']
   /** 请求职位列表 */
   fetchJobList: () => void
+  /** 渲染序号列表 */
+  renderSortList: (list: any[]) => ReactNode
   /** 职位列表数据改变事件 */
   onChange: (jobList: any[]) => void
 }
@@ -31,6 +33,7 @@ export const JobList = memo((props: JobListProps) => {
     fetchListStatus,
     getDisableStatus,
     fetchJobList,
+    renderSortList,
     onChange,
   } = props
 
@@ -155,6 +158,18 @@ export const JobList = memo((props: JobListProps) => {
         >
           全选
         </Checkbox>
+
+        {!!checkedList?.length && (
+          <Popover
+            content={
+              <div className="max-w-[300px] max-h-[200px] overflow-y-auto">
+                已选择第{renderSortList(checkedList)}项
+              </div>
+            }
+          >
+            <a className=" text-xs">(已选择 {checkedList.length} 项)</a>
+          </Popover>
+        )}
       </div>
 
       <Spin

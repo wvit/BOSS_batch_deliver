@@ -43,33 +43,39 @@ const batchOpenChatPage = async (jobList: any[], chatMessage: string) => {
         },
       }
     )
+    const { code, zpData } = addRes || {}
 
-    if (addRes?.code === 1 && addRes?.zpData?.bizCode === 1) {
+    if (code === 1) {
       /** 添加沟通联系人失败 */
-      const { content, title } = addRes.zpData.bizData?.chatRemindDialog || {}
-      commProgress.updateCurrentJob(index, { status: 'error', msg: title })
-      message.warning(content)
+      if (zpData?.bizCode === 1) {
+        const { content, title } = zpData.bizData?.chatRemindDialog || {}
+        commProgress.updateCurrentJob(index, { status: 'error', msg: title })
+        message.warning(content)
+      }
 
-      await sleep(500)
-      continue
-    } else if (addRes?.code === 0 && addRes?.zpData?.showGreeting) {
+      await sleep(1000)
+    } else if (zpData?.showGreeting) {
       /** 自己已在Boss直聘平台上已经配置了打招呼语 */
+      commProgress.updateCurrentJob(index, {
+        status: 'success',
+        msg: '发送消息完成',
+      })
       message.info('已向招聘者发送您的招呼语')
 
-      await sleep(500)
-      continue
+      await sleep(1000)
+    } else {
+      /** 打开浏览器新窗口，发送自定义信息 */
+      await new Promise<void>(reslove => {
+        chrome.runtime.sendMessage(
+          { action: 'openChatPage', jobData: item, chatMessage },
+          msg => {
+            commProgress.updateCurrentJob(index, msg?.[0]?.result)
+            /** 进入下一个循环 */
+            reslove()
+          }
+        )
+      })
     }
-
-    await new Promise<void>(reslove => {
-      chrome.runtime.sendMessage(
-        { action: 'openChatPage', jobData: item, chatMessage },
-        msg => {
-          commProgress.updateCurrentJob(index, msg?.[0]?.result)
-          /** 进入下一个循环 */
-          reslove()
-        }
-      )
-    })
   }
 }
 
@@ -83,16 +89,23 @@ export const bossInit = () => {
 
   chrome.runtime.onMessage.addListener(
     async (message, sender, sendResponse) => {
-      const { action, jobList, chatMessage } = message
+      const {
+        action,
+        jobList,
+        chatMessage,
+        gotoUrl,
+        gotoTarget = '_self',
+      } = message
 
       if (action === 'getFetchJobListOptions') {
         const fetchListOptions = JSON.parse(
           localStorage.getItem('fetchJobListOptions') || 'null'
         )
-
         sendResponse({ fetchListOptions })
       } else if (action === 'batchOpenChatPage') {
         batchOpenChatPage(jobList, chatMessage)
+      } else if (action === 'gotoPage') {
+        window.open(gotoUrl, gotoTarget)
       }
     }
   )
