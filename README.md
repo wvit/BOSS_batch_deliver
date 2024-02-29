@@ -17,6 +17,6 @@ BOSS直聘 批量沟通职位 chrome 插件，将根目录下 “dist.zip” 下
 
 ### 插件预览
 
-![插件内容](./src/aseets/imgs/demo1.jpg)
+![插件内容](/src/aseets/imgs/demo1.jpg)
 
-![批量沟通进度](./src/aseets/imgs/demo2.jpg)
+![批量沟通进度](/src/aseets/imgs/demo2.jpg)
