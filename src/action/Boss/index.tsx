@@ -89,7 +89,6 @@ export const Boss = () => {
         progress: Math.min(Math.ceil(100 / maxPageNo) * thisPageNo, 100),
       }))
 
-      /** 防止触发机器人验证 */
       await sleep(200)
     }
 
@@ -135,7 +134,6 @@ export const Boss = () => {
         progress: Math.min(Math.ceil(100 / list.length) * (index + 1), 100),
       }))
 
-      /** 防止触发机器人验证 */
       await sleep(100)
     }
 

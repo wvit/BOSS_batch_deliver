@@ -1,5 +1,5 @@
 import { message } from 'antd'
-import { Dom, getResource, axios } from '@/utils'
+import { Dom, getResource, axios, sleep } from '@/utils'
 import { commProgress } from './CommProgress'
 import './index.css'
 
@@ -44,18 +44,27 @@ const batchOpenChatPage = async (jobList: any[], chatMessage: string) => {
       }
     )
 
-    /** 提示添加沟通联系人失败消息 */
     if (addRes?.code === 1 && addRes?.zpData?.bizCode === 1) {
-      return message.warning(addRes.zpData.bizData?.chatRemindDialog?.content)
+      /** 添加沟通联系人失败 */
+      const { content, title } = addRes.zpData.bizData?.chatRemindDialog || {}
+      commProgress.updateCurrentJob(index, { status: 'error', msg: title })
+      message.warning(content)
+
+      await sleep(500)
+      continue
+    } else if (addRes?.code === 0 && addRes?.zpData?.showGreeting) {
+      /** 自己已在Boss直聘平台上已经配置了打招呼语 */
+      message.info('已向招聘者发送您的招呼语')
+
+      await sleep(500)
+      continue
     }
 
     await new Promise<void>(reslove => {
       chrome.runtime.sendMessage(
         { action: 'openChatPage', jobData: item, chatMessage },
         msg => {
-          /** 更新沟通状态 */
           commProgress.updateCurrentJob(index, msg?.[0]?.result)
-
           /** 进入下一个循环 */
           reslove()
         }

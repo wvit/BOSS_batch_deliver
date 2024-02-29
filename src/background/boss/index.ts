@@ -49,7 +49,9 @@ const openChatPage = async (
           getDom('.chat-op .btn-send'),
         ]
 
-        if (!(chatInput && emoji && sendBtn)) return 'error'
+        if (!(chatInput && emoji && sendBtn)) {
+          return { status: 'error', msg: '发送消息失败' }
+        }
 
         /** 先添加一个符号表情，触发输入框事件 */
         emoji.click()
@@ -66,7 +68,7 @@ const openChatPage = async (
 
         await sleep(500)
 
-        return 'success'
+        return { status: 'success', msg: '发送消息完成' }
       },
       args: [chatMessage],
     },

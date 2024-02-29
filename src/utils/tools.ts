@@ -30,5 +30,5 @@ export const getArr = length => {
     .map((_, index) => index)
 }
 
-/** 睡眠定时器 */
+/** 睡眠定时器，一般用于防止触发机器人验证或等待节点加载 */
 export const sleep = time => new Promise(resolve => setTimeout(resolve, time))

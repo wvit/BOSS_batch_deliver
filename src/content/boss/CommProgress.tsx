@@ -46,11 +46,10 @@ class CommProgress {
   }
 
   /** 更新当前正在处理的职位 */
-  updateCurrentJob = (endIndex: number, status: string) => {
+  updateCurrentJob = (endIndex: number, updateData) => {
     const jobItem = document.querySelector(`#job-item-${endIndex + 1}`)
 
-    /** 添加沟通状态 */
-    this.jobList[endIndex].commStatus = status
+    this.jobList[endIndex].updateData = updateData
     this.modal.update({
       content: this.renderContent(endIndex),
     })
@@ -99,7 +98,7 @@ class CommProgress {
               areaDistrict,
               businessDistrict,
               salaryDesc,
-              commStatus,
+              updateData,
             } = item
             const sort = index + 1
 
@@ -136,11 +135,16 @@ class CommProgress {
                   >
                     {areaDistrict}·{businessDistrict}
                   </span>
-                  {commStatus === 'error' && (
-                    <span className=" text-red-600">处理失败</span>
-                  )}
-                  {commStatus === 'success' && (
-                    <span className=" text-green-600">处理完成</span>
+                  {updateData?.status && (
+                    <span
+                      className={[
+                        updateData.status === 'error'
+                          ? 'text-red-600'
+                          : 'text-green-600',
+                      ].join(' ')}
+                    >
+                      {updateData.msg}
+                    </span>
                   )}
                 </div>
               </li>
