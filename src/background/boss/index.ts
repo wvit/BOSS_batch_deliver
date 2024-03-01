@@ -34,46 +34,58 @@ const openChatPage = async (
     )
   })
 
-  chrome.scripting.executeScript(
-    {
-      target: { tabId },
-      func: async chatMessage => {
-        const getDom = selector => document.querySelector(selector)
-        const sleep = time => new Promise(resolve => setTimeout(resolve, time))
+  /**  等待标签页加载完毕 */
+  const tabsLoad = (id, changeInfo) => {
+    if (!(id === tabId && changeInfo.status === 'complete')) return
 
-        await sleep(500)
+    /** 删除监听的标签页事件，避免多次触发 */
+    chrome.tabs.onUpdated.removeListener(tabsLoad)
 
-        const [chatInput, emoji, sendBtn] = [
-          getDom('#chat-input'),
-          getDom('.emoj.emoj-1'),
-          getDom('.chat-op .btn-send'),
-        ]
+    /** 注入js脚本代码 */
+    chrome.scripting.executeScript(
+      {
+        target: { tabId },
+        func: async chatMessage => {
+          const getDom = selector => document.querySelector(selector)
+          const sleep = time =>
+            new Promise(resolve => setTimeout(resolve, time))
 
-        if (!(chatInput && emoji && sendBtn)) {
-          return { status: 'error', msg: '发送消息失败' }
-        }
+          await sleep(500)
 
-        /** 先添加一个符号表情，触发输入框事件 */
-        emoji.click()
+          const [chatInput, emoji, sendBtn] = [
+            getDom('#chat-input'),
+            getDom('.emoj.emoj-1'),
+            getDom('.chat-op .btn-send'),
+          ]
 
-        await sleep(500)
+          if (!(chatInput && emoji && sendBtn)) {
+            return { status: 'error', msg: '发送消息失败' }
+          }
 
-        /** 添加输入框内容 */
-        chatInput.innerText = chatMessage
+          /** 先添加一个符号表情，触发输入框事件 */
+          emoji.click()
 
-        await sleep(500)
+          await sleep(500)
 
-        /** 点击触发按钮 */
-        sendBtn.click()
+          /** 添加输入框内容 */
+          chatInput.innerText = chatMessage
 
-        await sleep(500)
+          await sleep(500)
 
-        return { status: 'success', msg: '发送消息完成' }
+          /** 点击触发按钮 */
+          sendBtn.click()
+
+          await sleep(500)
+
+          return { status: 'success', msg: '发送消息完成' }
+        },
+        args: [chatMessage],
       },
-      args: [chatMessage],
-    },
-    sendResponse
-  )
+      sendResponse
+    )
+  }
+
+  chrome.tabs.onUpdated.addListener(tabsLoad)
 }
 
 /** 初始化boss直聘网站 background 脚本 */

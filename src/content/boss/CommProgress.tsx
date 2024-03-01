@@ -1,19 +1,29 @@
 import React from 'react'
 import { Modal, Progress, Button } from 'antd'
 
+type OptionsType = {
+  /** 职位列表 */
+  jobList: any[]
+  /** 关闭弹窗事件 */
+  onClose: () => void
+  /** 停止沟通事件 */
+  onStop: () => void
+}
+
 /** 批量沟通进度 */
 class CommProgress {
   /** 弹窗调用返回值 */
   modal = null as unknown as ReturnType<typeof Modal.info>
 
-  /** 职位列表 */
-  jobList: any[] = []
+  /** 职位沟通参数 */
+  options = {} as OptionsType
 
   /** 打开批量沟通进度弹窗 */
-  open(options: { jobList: any[]; onClose: () => void; onStop: () => void }) {
-    const { jobList, onClose, onStop } = options
+  open(options: OptionsType) {
+    /** 先将之前打开的弹窗关闭 */
+    this.modal?.destroy()
 
-    this.jobList = jobList
+    this.options = options
 
     this.modal = Modal.info({
       width: 800,
@@ -25,22 +35,7 @@ class CommProgress {
           </span>
         </>
       ),
-      footer: (
-        <div className=" text-right">
-          <Button className=" mr-4" onClick={onStop}>
-            停止发送消息
-          </Button>
-          <Button
-            type="primary"
-            onClick={() => {
-              onClose?.()
-              this.modal.destroy()
-            }}
-          >
-            关闭弹窗
-          </Button>
-        </div>
-      ),
+      footer: this.renderFooter('停止发送消息'),
       content: this.renderContent(-1),
     })
   }
@@ -49,22 +44,50 @@ class CommProgress {
   updateCurrentJob = (endIndex: number, updateData) => {
     const jobItem = document.querySelector(`#job-item-${endIndex + 1}`)
 
-    this.jobList[endIndex].updateData = updateData
+    this.options.jobList[endIndex].updateData = updateData
     this.modal.update({
       content: this.renderContent(endIndex),
     })
     jobItem?.scrollIntoView({ behavior: 'smooth', block: 'center' })
   }
 
+  renderFooter(stopBtnText) {
+    const { onStop, onClose } = this.options
+
+    return (
+      <div className=" text-right">
+        <Button
+          className=" mr-4"
+          onClick={() => {
+            onStop?.()
+            this.modal.update({ footer: this.renderFooter('已停止沟通') })
+          }}
+        >
+          {stopBtnText}
+        </Button>
+        <Button
+          type="primary"
+          onClick={() => {
+            onClose?.()
+            this.modal.destroy()
+          }}
+        >
+          关闭弹窗
+        </Button>
+      </div>
+    )
+  }
+
   /** 渲染弹窗内容 */
   renderContent(endIndex: number) {
+    const { jobList } = this.options
     /** endIndex 为上一次处理结束的数据索引，currentIndex 为正在处理的数据索引 */
     const currentIndex = endIndex + 1
     /** 正在处理的职位数据 */
-    const currentJob = this.jobList[currentIndex]
+    const currentJob = jobList[currentIndex]
     /** 正在处理的职位顺序值 */
     const currentSort = currentIndex + 1
-    const listLength = this.jobList.length
+    const listLength = jobList.length
     const done = currentSort > listLength
     const percent = Math.min(Math.ceil((100 / listLength) * currentIndex), 100)
 
@@ -91,7 +114,7 @@ class CommProgress {
         </div>
 
         <ul className="max-h-[300px] overflow-x-auto my-4 pr-4">
-          {this.jobList.map((item, index) => {
+          {jobList.map((item, index) => {
             const {
               jobName,
               brandName,
