@@ -51,8 +51,9 @@ export const JobList = memo((props: JobListProps) => {
       sort,
     } = item
     const disabled = getDisableStatus(item)
-    const jobDetail = jobDetailMap[encryptJobId] || {}
-    const { address, postDescription } = jobDetail.jobInfo || {}
+    const { jobInfo, bossInfo } = jobDetailMap[encryptJobId] || {}
+    const { address, postDescription } = jobInfo || {}
+    const { activeTimeDesc } = bossInfo || {}
 
     return (
       <li
@@ -60,7 +61,6 @@ export const JobList = memo((props: JobListProps) => {
         className="flex p-2 rounded mb-2 card-item bg-white text-xs"
         style={{
           border: '1px solid #f0f0f0',
-          pointerEvents: disabled ? 'none' : 'auto',
           opacity: disabled ? '0.4' : '',
         }}
       >
@@ -121,8 +121,14 @@ export const JobList = memo((props: JobListProps) => {
                   className=" max-w-[500px] max-h-[300px] overflow-auto m-1"
                 >
                   <div>
+                    <strong>招聘者活跃度：</strong>
+                    <span className=" text-xs text-[#333]">
+                      {activeTimeDesc}
+                    </span>
+                  </div>
+                  <div>
                     <strong>详细地址：</strong>
-                    <p className=" text-xs text-[#333]">{address}</p>
+                    <span className=" text-xs text-[#333]">{address}</span>
                   </div>
                   <div>
                     <strong>职位描述：</strong>

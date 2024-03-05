@@ -44,22 +44,29 @@ export const Boss = () => {
   ) => {
     const { bossTitle, encryptJobId, brandName } = jobData
     const jobDetail = jobDetailMap[encryptJobId]
-    const { relationInfo, jobInfo } = jobDetail || {}
+    const { relationInfo, jobInfo, bossInfo } = jobDetail || {}
     const disableStatus = {
       excludeComm: relationInfo?.beFriend,
+
       excludeHeadhunter: bossTitle.includes('猎头顾问'),
+
       excludeCompany: getPreference('companyNames').includes(brandName),
+
       excludeKeyword: !!getPreference('keywords').find(item => {
         const jd = jobInfo?.postDescription.replace(/\s/g, '')
         const pattern = new RegExp(item.replace(/\s/g, ''), 'i')
         return pattern.test(jd)
+      }),
+
+      excludeBossStatus: !!getPreference('bossStatus').find(item => {
+        return item === bossInfo?.activeTimeDesc
       }),
     }
     const disableList = Object.keys(disableStatus).map(key => {
       return getPreference(key as keyof PreferenceType) && disableStatus[key]
     })
 
-    /** 根据指定的偏好设置，获取当前的职位的禁用状态 */
+    /** 根据指定的偏好配置key，获取当前的职位的禁用状态 */
     if (preferenceKey) return disableStatus[preferenceKey]
 
     /** 根据所有的偏好设置，判断当前是否是否应该禁用 */
@@ -265,7 +272,7 @@ export const Boss = () => {
   return (
     <div className="h-[100%] flex flex-col">
       {renderHeadNotice()}
-      <Row className="my-2 h-0 flex-1">
+      <Row className="mt-2 h-0 flex-1">
         <Col span={13} className="h-[100%] flex flex-col ">
           <JobList
             jobList={jobList}
@@ -281,7 +288,8 @@ export const Boss = () => {
         </Col>
         <Col
           span={11}
-          className="pl-2 border border-t-0 border-r-0 border-b-0 border-dashed border-[#999] flex flex-col"
+          className="pl-2 !border-t-0 !border-r-0 !border-b-0 flex flex-col h-[100%]"
+          style={{ border: '1px dashed #999' }}
         >
           <PreferenceConfig
             jobList={jobList}
@@ -291,7 +299,10 @@ export const Boss = () => {
             renderSortList={renderSortList}
             onChange={changePreference}
           />
-          <div className="footer-btns text-right">
+          <div
+            className="footer-btns text-right pt-2 relative z-10"
+            style={{ boxShadow: 'rgba(0, 0, 0, 0.08) 0 -2px 4px 0' }}
+          >
             <Popconfirm
               title="是否确认执行?"
               description="请注意每个平台的每天最大沟通聊天限制"

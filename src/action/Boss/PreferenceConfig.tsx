@@ -15,6 +15,11 @@ export type PreferenceType = {
   excludeComm: boolean
   /** 是否排除JD内容中包含关键字的职位 */
   excludeKeyword: boolean
+  /** 是否排除指定的招聘者活跃度 */
+  excludeBossStatus: boolean
+
+  /** 需要排除的招聘者活跃度 */
+  bossStatus: string[]
   /** 需要排除的公司名称列表 */
   companyNames: string[]
   /** 需要排除的内容关键词列表 */
@@ -50,6 +55,9 @@ export const defaultPreference: PreferenceType = {
   excludeCompany: true,
   excludeComm: true,
   excludeKeyword: true,
+  excludeBossStatus: true,
+
+  bossStatus: ['半年前活跃'],
   companyNames: [],
   keywords: [],
 }
@@ -92,7 +100,11 @@ export const PreferenceConfig = memo((props: PreferenceConfigProps) => {
   }
 
   return (
-    <Space direction="vertical" size="large" className="h-0 flex-1">
+    <Space
+      direction="vertical"
+      size="large"
+      className="h-0 flex-1 overflow-y-auto pb-2"
+    >
       <div>
         <Space>
           每页加载
@@ -193,7 +205,32 @@ export const PreferenceConfig = memo((props: PreferenceConfigProps) => {
               placeholder="请输入需要排除的JD内容关键字"
               value={getPreference('keywords')}
               onChange={e => onChange('keywords', e)}
-              options={getTagOptions(['外派', '外包', '出差', '抗压'])}
+              options={getTagOptions(['外派', '外包', '出差', '抗压', '英语'])}
+            />
+          </div>
+
+          <div>
+            <Checkbox
+              checked={getPreference('excludeBossStatus')}
+              onChange={e => onChange('excludeBossStatus', e.target.checked)}
+            >
+              排除招聘者活跃度状态
+            </Checkbox>
+            {renderExcludeList('excludeBossStatus')}
+            <Select
+              mode="multiple"
+              className="w-[100%] mt-1"
+              placeholder="请选择您需要排除的招聘者活跃度状态"
+              value={getPreference('bossStatus')}
+              onChange={e => onChange('bossStatus', e)}
+              options={getTagOptions([
+                '刚刚活跃',
+                '今日活跃',
+                '3日内活跃',
+                '本周活跃',
+                '2周内活跃',
+                '半年前活跃',
+              ])}
             />
           </div>
         </Space>
