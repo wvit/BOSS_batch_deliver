@@ -27,6 +27,10 @@ const batchOpenChatPage = async (jobList: any[], chatMessage: string) => {
 
     /** 每 20 次重新获取一下 token，因为我感觉他们对每个 token 的沟通次数有限制 */
     if (!(index % 20)) {
+      chrome.runtime.sendMessage({ action: 'closeWindow' })
+
+      await sleep(2000)
+
       token =
         (await axios.get('/wapi/zppassport/get/zpToken'))?.zpData?.token ||
         token
