@@ -1,15 +1,15 @@
 {
-  "name": "record-step",
+  "name": "boss_batch_deliver",
   "version": "1.0.0",
   "description": "",
   "main": "webpack.config.js",
   "scripts": {
-    "build": "webpack",
+    "build": "webpack && node zip.js",
     "dev": "webpack --watch"
   },
   "repository": {
     "type": "git",
-    "url": "https://e.coding.net/wvit/plugin/record-step.git"
+    "url": "https://github.com/wvit/BOSS_batch_deliver"
   },
   "author": "",
   "license": "ISC",
@@ -26,6 +26,7 @@
     "babel-loader": "^9.1.3",
     "clean-webpack-plugin": "^3.0.0",
     "copy-webpack-plugin": "^8.1.1",
+    "cross-zip": "^4.0.1",
     "css-loader": "^6.10.0",
     "html-webpack-plugin": "^5.6.0",
     "postcss": "^8.4.35",
