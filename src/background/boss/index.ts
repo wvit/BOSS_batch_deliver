@@ -55,7 +55,7 @@ const openChatPage = async (
 
           /** 定时检测器 */
           const inspectTimer = callback => {
-            return new Promise(resolve => {
+            return new Promise<number>(resolve => {
               let count = 0
 
               const timer = setInterval(() => {
@@ -101,7 +101,7 @@ const openChatPage = async (
           sendBtn.click()
 
           /** 检测消息是否发送完成 */
-          await inspectTimer(() => {
+          const count = await inspectTimer(() => {
             const classList = Array.from(
               document.querySelectorAll('.item-myself .message-text .status')
             ).pop()?.classList
@@ -112,9 +112,12 @@ const openChatPage = async (
             )
           })
 
-          await sleep(200)
-
-          return { status: 'success', msg: '发送消息完成' }
+          if (count > 30) {
+            return { status: 'error', msg: '发送消息超时' }
+          } else {
+            await sleep(200)
+            return { status: 'success', msg: '发送消息完成' }
+          }
         },
         args: [chatMessage],
       },

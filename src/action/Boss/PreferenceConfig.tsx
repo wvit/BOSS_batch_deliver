@@ -205,7 +205,15 @@ export const PreferenceConfig = memo((props: PreferenceConfigProps) => {
               placeholder="请输入需要排除的JD内容关键字"
               value={getPreference('keywords')}
               onChange={e => onChange('keywords', e)}
-              options={getTagOptions(['外派', '外包', '出差', '抗压', '英语'])}
+              options={getTagOptions([
+                '外派',
+                '外包',
+                '出差',
+                '抗压',
+                '英语',
+                '销售',
+                '绩效'
+              ])}
             />
           </div>
 
