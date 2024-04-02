@@ -95,7 +95,7 @@ const openChatPage = async (
           /** 添加输入框内容 */
           chatInput.innerText = chatMessage
 
-          await sleep(100)
+          await sleep(500)
 
           /** 点击触发按钮 */
           sendBtn.click()
