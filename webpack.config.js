@@ -5,27 +5,23 @@ const HtmlWebpackPlugin = require('html-webpack-plugin')
 
 const copyFiles = [
   {
-    from: './src/assets/manifest.json',
-    to: `${path.resolve('dist')}/manifest.json`,
-  },
-  {
-    from: './src/assets/icon.png',
-    to: `${path.resolve('dist')}/icon.png`,
+    from: 'public',
+    to: `${path.resolve('dist')}/`,
   },
 ]
 
-module.exports = {
-  mode: 'production',
+module.exports = {  
   cache: {
     type: 'filesystem',
   },
+  
   entry: {
     action: './src/action/index.tsx',
     content: './src/content/index.ts',
     background: './src/background/index.ts',
-
     content_boss_watchXhr: './src/content/boss/watchXhr.ts',
   },
+
   output: {
     path: path.resolve(__dirname, 'dist'),
     filename: chunkData => {
@@ -38,18 +34,20 @@ module.exports = {
       }
     },
   },
+
   plugins: [
     new CleanWebpackPlugin(),
 
     new CopyWebpackPlugin({ patterns: copyFiles }),
 
     new HtmlWebpackPlugin({
-      template: './src/assets/template.html',
+      template: './src/action/index.html',
       filename: './action/index.html',
       inject: 'body',
       chunks: ['action'],
     }),
   ],
+
   module: {
     rules: [
       {
@@ -84,6 +82,7 @@ module.exports = {
       },
     ],
   },
+
   resolve: {
     extensions: ['.ts', '.tsx', '.js'],
     alias: { '@': path.join(__dirname, 'src') },

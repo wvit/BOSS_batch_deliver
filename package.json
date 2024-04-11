@@ -4,8 +4,8 @@
   "description": "",
   "main": "webpack.config.js",
   "scripts": {
-    "build": "webpack && node zip.js",
-    "dev": "webpack --watch"
+    "build": "webpack --watch --progress",
+    "build:zip": "webpack --progress && node zip.js"
   },
   "repository": {
     "type": "git",

@@ -240,10 +240,6 @@ export const Boss = () => {
                       {renderLink(
                         'https://github.com/wvit/BOSS_batch_deliver.git'
                       )}
-                      <span className=" mx-2">或</span>
-                      {renderLink(
-                        'https://gitee.com/wvit/BOSS_batch_deliver.git'
-                      )}
                     </p>
                   </Space>
                 </div>

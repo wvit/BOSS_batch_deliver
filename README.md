@@ -16,16 +16,16 @@ BOSS 直聘 批量沟通职位 chrome 插件，将根目录下 “chrome-extensi
    建议批量沟通超过最好不要超过 70 个，因为如果你再看到心动的职位，会陷入“您沟通的职位已达当日上限”。
 
 5. 如果在使用过程中出现问题，您可以尝试网页或重新加载插件。 本插件不会记录和获取你在招聘平台的任何用户信息，请放心使用。
-   这是插件的代码仓库地址：[Github](https://github.com/wvit/BOSS_batch_deliver.git) 或 [Gitee](https://gitee.com/wvit/BOSS_batch_deliver.git)
+   这是插件的代码仓库地址：[Github](https://github.com/wvit/BOSS_batch_deliver.git)
 
 ### 插件预览
 
 ###### 插件内容.jpg
 
-![插件内容](./src/assets/imgs/demo1.jpg)
+![插件内容](https://wvit.github.io/static/boss-batch/img1.jpg)
 
 ---
 
 ###### 批量沟通进度.jpg
 
-![批量沟通进度](./src/assets/imgs/demo2.jpg)
+![批量沟通进度](https://wvit.github.io/static/boss-batch/img2.jpg)
