@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "BOSS_batch_deliver",
   "description": "BOOS直聘批量沟通消息",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "icons": {
     "16": "icon.png",
     "48": "icon.png",
