@@ -25,7 +25,7 @@
     "service_worker": "background/index.js"
   },
   "permissions": ["scripting", "tabs", "activeTab", "storage"],
-  "host_permissions": ["*://*/*"],
+  "host_permissions": ["*://*.zhipin.com/*"],
   "web_accessible_resources": [
     {
       "resources": ["*.png", "content/*.js"],
