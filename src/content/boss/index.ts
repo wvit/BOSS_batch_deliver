@@ -1,5 +1,5 @@
 import { message } from 'antd'
-import { Dom, getResource, axios, sleep } from '@/utils'
+import { dom, getResource, axios, sleep } from '@/utils'
 import { commProgress } from './CommProgress'
 import './index.css'
 
@@ -92,7 +92,7 @@ const batchOpenChatPage = async (jobList: any[], chatMessage: string) => {
 /** 初始化boss直聘网站 content 脚本 */
 export const bossInit = () => {
   /** 因为直接在content脚本中无法部分window属性，所以需要单独插入一段脚本 */
-  Dom.query('body').create('script', {
+  dom.query('body').create('script', {
     type: 'text/javascript',
     src: getResource('/content/boss/watchXhr.js'),
   })

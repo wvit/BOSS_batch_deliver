@@ -1,4 +1,4 @@
-import qs from 'qs'
+import { qs } from '@vorker/utils'
 
 /** 拦截XHR请求并获取参数 */
 const interceptorXhr = () => {
