@@ -99,13 +99,7 @@ export const bossInit = () => {
 
   chrome.runtime.onMessage.addListener(
     async (message, sender, sendResponse) => {
-      const {
-        action,
-        jobList,
-        chatMessage,
-        gotoUrl,
-        gotoTarget = '_self',
-      } = message
+      const { action, jobList, chatMessage } = message
 
       if (action === 'getFetchJobListOptions') {
         const fetchListOptions = JSON.parse(
@@ -114,8 +108,6 @@ export const bossInit = () => {
         sendResponse({ fetchListOptions })
       } else if (action === 'batchOpenChatPage') {
         batchOpenChatPage(jobList, chatMessage)
-      } else if (action === 'gotoPage') {
-        window.open(gotoUrl, gotoTarget)
       }
     }
   )

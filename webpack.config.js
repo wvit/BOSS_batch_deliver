@@ -10,11 +10,11 @@ const copyFiles = [
   },
 ]
 
-module.exports = {  
+module.exports = {
   cache: {
     type: 'filesystem',
   },
-  
+
   entry: {
     action: './src/action/index.tsx',
     content: './src/content/index.ts',

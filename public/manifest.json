@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "BOSS_batch_deliver",
-  "description": "BOOS直聘批量投递简历",
+  "description": "BOOS直聘批量沟通消息",
   "version": "0.0.2",
   "icons": {
     "16": "icon.png",
@@ -24,15 +24,7 @@
     "matches": ["*://*.zhipin.com/*"],
     "service_worker": "background/index.js"
   },
-  "permissions": [
-    "scripting",
-    "tabs",
-    "storage",
-    "webNavigation",
-    "activeTab",
-    "webRequest",
-    "contextMenus"
-  ],
+  "permissions": ["scripting", "tabs", "activeTab", "storage"],
   "host_permissions": ["*://*/*"],
   "web_accessible_resources": [
     {
