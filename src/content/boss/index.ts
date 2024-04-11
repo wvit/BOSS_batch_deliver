@@ -4,7 +4,12 @@ import { commProgress } from './CommProgress'
 import './index.css'
 
 /** 批量打开沟通聊天对话 */
-const batchOpenChatPage = async (jobList: any[], chatMessage: string) => {
+const batchOpenChatPage = async (options: {
+  jobList: any[]
+  chatMessage: string
+  intervalTime: number
+}) => {
+  const { jobList, chatMessage, intervalTime } = options
   if (!jobList?.length) return
   /** 添加沟通联系人需要的 token */
   let token = null
@@ -59,7 +64,10 @@ const batchOpenChatPage = async (jobList: any[], chatMessage: string) => {
       /** 添加沟通联系人失败 */
       if (zpData?.bizCode === 1) {
         const { content, title } = zpData.bizData?.chatRemindDialog || {}
-        commProgress.updateCurrentJob(index, { status: 'error', msg: title })
+        commProgress.updateCurrentJob(index, {
+          status: 'error',
+          msg: content || title,
+        })
         message.warning(content)
       }
 
@@ -77,7 +85,7 @@ const batchOpenChatPage = async (jobList: any[], chatMessage: string) => {
       /** 打开浏览器新窗口，发送自定义信息 */
       await new Promise<void>(reslove => {
         chrome.runtime.sendMessage(
-          { action: 'openChatPage', jobData: item, chatMessage },
+          { action: 'openChatPage', jobData: item, chatMessage, intervalTime },
           msg => {
             commProgress.updateCurrentJob(index, msg?.[0]?.result)
             /** 进入下一个循环 */
@@ -99,7 +107,7 @@ export const bossInit = () => {
 
   chrome.runtime.onMessage.addListener(
     async (message, sender, sendResponse) => {
-      const { action, jobList, chatMessage } = message
+      const { action, jobList, chatMessage, intervalTime } = message
 
       if (action === 'getFetchJobListOptions') {
         const fetchListOptions = JSON.parse(
@@ -107,7 +115,7 @@ export const bossInit = () => {
         )
         sendResponse({ fetchListOptions })
       } else if (action === 'batchOpenChatPage') {
-        batchOpenChatPage(jobList, chatMessage)
+        batchOpenChatPage({ jobList, chatMessage, intervalTime })
       }
     }
   )

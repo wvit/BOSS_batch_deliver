@@ -1,10 +1,20 @@
 import React, { memo, ReactNode } from 'react'
-import { Space, Select, Checkbox, Spin, Popover, Input } from 'antd'
+import {
+  Space,
+  Select,
+  Checkbox,
+  Spin,
+  Popover,
+  Input,
+  InputNumber,
+} from 'antd'
 import { getArr } from '@/utils'
 
 export type PreferenceType = {
   /** 每页加载数量 */
   pageSize: number
+  /** 发送消息间隔时间 ms */
+  intervalTime: number
   /** 和职位招聘人打招呼的文案 */
   chatMessage: string
   /** 是否排除添加公司列表 */
@@ -50,6 +60,7 @@ export interface PreferenceConfigProps {
 /** 默认偏好配置 */
 export const defaultPreference: PreferenceType = {
   pageSize: 30,
+  intervalTime: 2000,
   chatMessage: '',
   excludeHeadhunter: false,
   excludeCompany: true,
@@ -121,15 +132,53 @@ export const PreferenceConfig = memo((props: PreferenceConfigProps) => {
           条数据
         </Space>
       </div>
+
+      <div>
+        <Space>
+          消息发送间隔时间
+          <Popover
+            content={
+              <div className="w-[350px]">
+                <h4>为什么会有“间隔时间”？:</h4>
+                <p className=" mt-1">
+                  1、防止触发机器人验证 和 避免给对方服务器造成压力。
+                </p>
+                <p className=" mt-1">
+                  2、平台的消息发送使用 websocket，操作太快容易出现断开链接导致发送超时等问题。
+                </p>
+                <p className=" mt-1">
+                  3、如果您的发送超时概率较大，可以尝试调大此间隔时间（默认2000ms）。
+                </p>
+                <p className=" mt-1">
+                  4、使用平台配置的 [打招呼语] 时，不受此配置影响。
+                </p>
+              </div>
+            }
+          >
+            <span className="flex flex-shrink-0 cursor-pointer justify-center w-[14px] h-[14px] text-[12px] text-[#999] rounded-[50%] border border-solid border-[#999]">
+              ?
+            </span>
+          </Popover>
+          <InputNumber
+            min={1000}
+            max={5000}
+            step={500}
+            value={getPreference('intervalTime')}
+            onChange={e => onChange('intervalTime', e!)}
+          />
+          ms
+        </Space>
+      </div>
+
       <div>
         <p className="flex flex-shrink-0 mr-2">
           自动向招聘人发送的消息
           <Popover
             content={
-              <div className="w-[300px]">
+              <div className="w-[350px]">
                 将优先使用您在平台配置的打招呼语，如果您未设置，也可以在下列输入框添加自定义消息。
                 <p className=" mt-3">
-                  打招呼语配置路径：{`[设置] > [打招呼语]`}{' '}
+                  打招呼语配置路径：{`[设置] > [打招呼语]`}
                 </p>
               </div>
             }
@@ -212,7 +261,7 @@ export const PreferenceConfig = memo((props: PreferenceConfigProps) => {
                 '抗压',
                 '英语',
                 '销售',
-                '绩效'
+                '绩效',
               ])}
             />
           </div>

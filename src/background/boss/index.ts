@@ -1,38 +1,36 @@
 /** 当前打开窗口id */
-let windowId = null
+let windowId: number | null = null
 
 /** 打开聊天对话标签页 */
 const openChatPage = async (
-  jobData: any,
-  chatMessage: string,
-  sendResponse: (msg: string) => void
+  sendResponse: (msg: string) => void,
+  options: {
+    jobData: any
+    chatMessage: string
+    intervalTime: number
+  }
 ) => {
+  const { jobData, chatMessage, intervalTime } = options
   const { encryptBossId, encryptJobId, securityId, lid } = jobData
 
   if (!windowId) {
-    windowId = await new Promise(reslove => {
-      /** 打开新窗口 */
-      chrome.windows.create(
-        {
-          url: 'about:blank',
-          type: 'normal',
-          state: 'minimized',
-        },
-        window => reslove(window.id)
-      )
-    })
+    /** 打开新窗口 */
+    windowId = (
+      await chrome.windows.create({
+        url: 'about:blank',
+        type: 'normal',
+        state: 'minimized',
+      })
+    ).id!
   }
 
-  const tabId: any = await new Promise(resolve => {
-    /** 打开新的聊天对话页面 */
-    chrome.tabs.create(
-      {
-        windowId,
-        url: `https://www.zhipin.com/web/geek/chat?id=${encryptBossId}&jobId=${encryptJobId}&securityId=${securityId}&lid=${lid}`,
-      },
-      tab => resolve(tab.id)
-    )
-  })
+  /** 打开新的聊天对话页面 */
+  const tabId = (
+    await chrome.tabs.create({
+      windowId,
+      url: `https://www.zhipin.com/web/geek/chat?id=${encryptBossId}&jobId=${encryptJobId}&securityId=${securityId}&lid=${lid}`,
+    })
+  ).id!
 
   /**  等待标签页加载完毕 */
   const tabsLoad = (id, changeInfo) => {
@@ -45,16 +43,13 @@ const openChatPage = async (
     chrome.scripting.executeScript(
       {
         target: { tabId },
-        func: async chatMessage => {
-          const getDom = selector => document.querySelector(selector)
-
+        func: async (chatMessage, intervalTime) => {
           /** 睡眠定时器 */
           const sleep = time => {
             return new Promise(resolve => setTimeout(resolve, time))
           }
-
           /** 定时检测器 */
-          const inspectTimer = callback => {
+          const inspectTimer = (callback, maxCount) => {
             return new Promise<number>(resolve => {
               let count = 0
 
@@ -66,22 +61,27 @@ const openChatPage = async (
 
                 count++
                 try {
-                  if (callback(count) || count > 30) done()
+                  if (callback(count) || count > maxCount) done()
                 } catch (e) {
                   done()
                   console.error('inspectTimer 出错', e)
                 }
-              }, 100)
+              }, 50)
             })
           }
+          /** 获取dom节点 */
+          const getDom = selector => document.querySelector(selector)
 
-          await sleep(500)
+          let [chatInput, emoji, sendBtn] = [] as any[]
 
-          const [chatInput, emoji, sendBtn] = [
-            getDom('#chat-input'),
-            getDom('.emoj.emoj-1'),
-            getDom('.chat-op .btn-send'),
-          ]
+          /** 检测所需dom节点是否加载完毕 */
+          await inspectTimer(() => {
+            chatInput = getDom('#chat-input')
+            emoji = getDom('.emoj.emoj-1')
+            sendBtn = getDom('.chat-op .btn-send')
+
+            return chatInput && emoji && sendBtn
+          }, 60)
 
           if (!(chatInput && emoji && sendBtn)) {
             return { status: 'error', msg: '发送消息失败' }
@@ -95,13 +95,13 @@ const openChatPage = async (
           /** 添加输入框内容 */
           chatInput.innerText = chatMessage
 
-          await sleep(500)
+          await sleep(Number(intervalTime))
 
           /** 点击触发按钮 */
           sendBtn.click()
 
           /** 检测消息是否发送完成 */
-          const count = await inspectTimer(() => {
+          const inspectSendCount = await inspectTimer(() => {
             const classList = Array.from(
               document.querySelectorAll('.item-myself .message-text .status')
             ).pop()?.classList
@@ -110,18 +110,20 @@ const openChatPage = async (
               classList?.contains('status-delivery') ||
               classList?.contains('status-read')
             )
-          })
+          }, 40)
 
-          if (count > 30) {
+          if (inspectSendCount > 40) {
             return { status: 'error', msg: '发送消息超时' }
           } else {
-            await sleep(200)
             return { status: 'success', msg: '发送消息完成' }
           }
         },
-        args: [chatMessage],
+        args: [
+          chatMessage || '你好，请问此岗位还有需要吗？',
+          intervalTime || 2000,
+        ],
       },
-      sendResponse
+      sendResponse as any
     )
   }
 
@@ -131,10 +133,10 @@ const openChatPage = async (
 /** 初始化boss直聘网站 background 脚本 */
 export const bossInit = () => {
   chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-    const { action, jobData, chatMessage } = message
+    const { action, jobData, chatMessage, intervalTime } = message
 
     if (action === 'openChatPage') {
-      openChatPage(jobData, chatMessage, sendResponse)
+      openChatPage(sendResponse, { jobData, chatMessage, intervalTime })
     } else if (action === 'closeWindow' && windowId) {
       chrome.windows.remove(windowId, () => {
         windowId = null

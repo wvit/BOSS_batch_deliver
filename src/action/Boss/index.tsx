@@ -54,8 +54,12 @@ export const Boss = () => {
 
       excludeKeyword: !!getPreference('keywords').find(item => {
         const jd = jobInfo?.postDescription.replace(/\s/g, '')
-        const pattern = new RegExp(item.replace(/\s/g, ''), 'i')
-        return pattern.test(jd)
+        /** 去掉空格和对部分字符进行转义 */
+        const replaceStr = item
+          .replace(/\s/g, '')
+          .replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+
+        return new RegExp(replaceStr, 'i').test(jd)
       }),
 
       excludeBossStatus: !!getPreference('bossStatus').find(item => {
@@ -150,7 +154,7 @@ export const Boss = () => {
   /** 发送message事件 */
   const sendMessage = async (message, callback?) => {
     const { id } = (await chrome.tabs.query({ active: true }))[0]
-    chrome.tabs.sendMessage(id, message, callback)
+    chrome.tabs.sendMessage(id!, message, callback)
   }
 
   /** 改变偏好配置数据 */
@@ -231,6 +235,7 @@ export const Boss = () => {
               sendMessage({
                 action: 'batchOpenChatPage',
                 chatMessage: getPreference('chatMessage'),
+                intervalTime: getPreference('intervalTime'),
                 jobList: checkedList,
               })
               window.close()
