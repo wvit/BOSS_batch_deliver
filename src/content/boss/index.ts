@@ -12,7 +12,8 @@ const batchOpenChatPage = async (options: {
   const { jobList, chatMessage, intervalTime } = options
   if (!jobList?.length) return
   /** 添加沟通联系人需要的 token */
-  let token = null
+  const { token } =
+    (await axios.get('/wapi/zppassport/get/zpToken'))?.zpData || {}
   /** 是否停止发送消息 */
   let stopSendMsg = false
 
@@ -29,17 +30,6 @@ const batchOpenChatPage = async (options: {
 
   for (const [index, item] of jobList.entries()) {
     const { encryptJobId, securityId, lid } = item
-
-    /** 每 20 次重新获取一下 token，因为我感觉他们对每个 token 的沟通次数有限制 */
-    if (!(index % 20)) {
-      chrome.runtime.sendMessage({ action: 'closeWindow' })
-
-      await sleep(2000)
-
-      token =
-        (await axios.get('/wapi/zppassport/get/zpToken'))?.zpData?.token ||
-        token
-    }
 
     /** 是否停止发送沟通消息 */
     if (stopSendMsg || !token) return

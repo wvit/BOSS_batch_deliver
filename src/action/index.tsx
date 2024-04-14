@@ -12,7 +12,7 @@ const App = () => {
   /** 获取当前选中的浏览器标签页数据 */
   const getCurrentTabData = async () => {
     const { url } = (await chrome.tabs.query({ active: true }))[0]
-    const isZhipin = /^https?:\/\/(?:www\.)?zhipin\.com(?:\/.*)?$/.test(url)
+    const isZhipin = /^https?:\/\/(?:www\.)?zhipin\.com(?:\/.*)?$/.test(url!)
     setBossVisible(isZhipin)
   }
 

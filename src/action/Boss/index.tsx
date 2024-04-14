@@ -154,7 +154,13 @@ export const Boss = () => {
   /** 发送message事件 */
   const sendMessage = async (message, callback?) => {
     const { id } = (await chrome.tabs.query({ active: true }))[0]
-    chrome.tabs.sendMessage(id!, message, callback)
+
+    try {
+      const resMsg = await chrome.tabs.sendMessage(id!, message)
+      callback?.(resMsg)
+    } catch (e) {
+      console.log('sendMessage 出错了', e)
+    }
   }
 
   /** 改变偏好配置数据 */

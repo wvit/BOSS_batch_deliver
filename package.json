@@ -5,7 +5,7 @@
   "main": "webpack.config.js",
   "scripts": {
     "build": "webpack --watch --progress",
-    "build:zip": "webpack --progress && node zip.js"
+    "zip": "webpack --progress && node zip.js"
   },
   "repository": {
     "type": "git",
