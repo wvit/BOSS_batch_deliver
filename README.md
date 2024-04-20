@@ -1,6 +1,8 @@
 ### BOSS_Batch_Deliver
 
-BOSS 直聘 批量沟通职位 chrome 插件，将根目录下 [“chrome-extension.zip”](https://github.com/wvit/BOSS_batch_deliver/raw/main/chorme-extension.zip) 下载并解压后，在 chrome://extensions/ 插件管理页面加载即可使用。
+[Google 扩展商店](https://chromewebstore.google.com/detail/boss%E7%9B%B4%E8%81%98%E6%89%B9%E9%87%8F%E6%B2%9F%E9%80%9A/ijmifekpgajhmnmmcmldbmocjagcekmg)
+
+BOSS 直聘批量沟通职位 chrome 插件，将根目录下 [“chrome-extension.zip”](https://github.com/wvit/BOSS_batch_deliver/raw/main/chorme-extension.zip) 下载并解压后，在 chrome://extensions/ 插件管理页面加载即可使用。
 
 主要使用 react + ts + antd + tailwindcss 编写。
 
